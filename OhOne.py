@@ -143,11 +143,10 @@ class augmentext():
         elif len(loc)>1:
             in_yet=False
             for stuff in loc:
-                if type(stuff) is tuple: 
+                if type(stuff)==tuple: 
                     if word in stuff:
                         in_yet=True
                         pos=stuff[1]
-                        
                         break
             return in_yet, pos
         else:
@@ -155,35 +154,61 @@ class augmentext():
                        
          
     def add_words(self,liste):
-        for i in liste:
-            in_yet, target=self.is_it_in_yet(i)
-            if in_yet==True:
-                stdout.write('\r'+i+' is already in dictionary at position '+str(target)+'\n')
-            else:
-                try:
-                    if target<self.dict_size/2:
-                        for k in range(target,self.dict_size-1):
-                            if self.dictionary[k]==[]:
-                                self.dictionary[target].append((i,k)) 
-                                self.dictionary[k].append(i) 
-                                stdout.write('\r'+i+' added at Position '+str(k)+'\n')
-                                break
-                    else:
-                        for k in range(target,-1,-1):
-                            if self.dictionary[k]==[]:
-                                self.dictionary[target].append((i,k)) 
-                                self.dictionary[k].append(i) 
-                                stdout.write('\r'+i+' added at Position '+str(k)+'\n')
-                                break   
-                except:
-                    self.dictionary.append([i])
-                    pos=len(self.dictionary)-1
-                    self.dictionary[target].append((i,pos))
-                    stdout.write('\r'+i+' added at Position '+str(pos)+'\n')# if there are no open positiones anymore
-                
+        if len(liste)>1000: 
+            self.threaded([self.add_words,'addwords',liste])
+        else:
+            stdout.write('\n\nwith worker '+str(os.getpid())+'\n')
+            for i in liste:
+                in_yet, target=self.is_it_in_yet(i)
+                if in_yet==True:
+                    continue#stdout.write('\r'+i+' is already in dictionary at position '+str(target)+'\n')
+                else:
+                    if type(self.dictionary)=='multiprocessing.managers.ListProxy':                  
+                        self.lock.acquire()
+                    try:
+                        if target<self.dict_size/2:
+                            for k in range(target,self.dict_size-1):
+                                if self.dictionary[k]==[]:
+                                    if k!=target:
+                                        self.dictionary[target].append((i,k)) 
+                                    self.dictionary[k].append(i) 
+                                    stdout.write('\r'+i+' added at Position '+str(k)+'\n')
+                                    break
+                        else:
+                            for k in range(target,-1,-1):
+                                if self.dictionary[k]==[]:
+                                    if k!=target:
+                                        self.dictionary[target].append((i,k)) 
+                                    self.dictionary[k]=[i]
+                                    stdout.write('\r'+i+' added at Position '+str(k)+'\n')
+                                    break   
+                    except:
+                        self.dictionary.append([i])
+                        pos=len(self.dictionary)-1
+                        self.dictionary[target].append((i,pos))
+                        stdout.write('\r'+i+' added at Position '+str(pos)+'\n')# if there are no open positiones anymore
+                    if type(self.dictionary)=='multiprocessing.managers.ListProxy':   
+                        self.lock.release()
+    
+    def threaded(self,func):
+        num_threads=mp.cpu_count()
+        segs=[x*int(len(func[2])/num_threads) for x in range(num_threads+1)]
+        segs[-1]=len(func[2])
+        thread_list=[]
             
-    def build_dict(self,path='F:/Desktop/_AugmenText/dictionary/words.txt'): #
-        dict_size=self.dict_size
+        for i in range(len(segs)-1):
+            if len(func)==3:  
+                t=th.Thread(target=func[0],name=func[1],args=(func[2][segs[i]:segs[i+1]],))
+            elif len(func)==2:
+                t=th.Thread(target=func[0],name=func[1])
+            t.start()
+            thread_list.append(t)
+    
+        # for thread in thread_list:
+        #     thread.join()     
+                          
+    
+    def build_dict(self,path='F:/Desktop/_AugmenText/dictionary/words.txt'): 
         words=open(path,'rb')
         txt=words.read().decode('utf8','ignore').split('\n')
         words.close()
@@ -191,51 +216,26 @@ class augmentext():
         liste=[]
         
         for i in txt:
-            liste.append((self.hash_it(i),self.word_it(i)))
-        
-        liste2=[]
-        for i in liste:
-            if i[0]<0:
-                liste2.append(((i[0]*-1)%dict_size,i[1]))
-            else:
-                liste2.append((i[0]%dict_size,i[1]))
+            liste.append((self.hash_it(i),i))
         
         self.dictionary=[]
+        self.rejected=[]
         for i in range(10**6):
             self.dictionary.append([])
         x,k=0,0
-        for i,y in liste2:
+        for i,y in liste:
             in_yet,_=self.is_it_in_yet(y)
             if in_yet!=True:
-                self.dictionary[i].append(y)
+                self.dictionary[i].append(self.word_it(y))
                 k+=1
+            else:
+                self.rejected.append(y)
             x+=1
         print('\n'+str(k)+' from '+str(x)+' Words added\n')
         
         txt=None
-        liste2=None
-        liste=liste2
-        
-        # x=0
-        # output='[] 0%'
-        # stdout.write('\r%s'%output)
-        # for prog,stuff in enumerate(self.dictionary):
-        #     if prog%(self.dict_size*0.0001)==0:
-        #         stdout.write('\r%s'%'['+'||'*int(prog/(self.dict_size/10))+'] '+str(round(prog/self.dict_size*100,4))+'%')
-                
-        #     if len(stuff)>1:
-        #         for i in range(1,len(stuff)):
-        #             if type(stuff[i])!=tuple:
-        #                 for pos,entry in enumerate(self.dictionary[x:]):
-        #                     if entry==[]:
-        #                         pos+=x                            
-        #                         entry.append(stuff[i])
-        #                         stuff[i]=(stuff[i],pos)
-        #                         x=pos
-        #                         break
-        
-        # stdout.write('\r%s\n'%'[||||||||||||||||||] 100.00%')
-           
+        liste=None
+          
      
     def threaded_build(self,seg,seg2):
         x=0
@@ -262,34 +262,14 @@ class augmentext():
         self.lock.release()
         stdout.write('\rsegment '+str(seg)+' to '+str(seg2)+' has finished\n')
     
+    
     def load_bar(self):
         while self.count.value<self.dict_size:           
             tot_prog=self.count.value
             if tot_prog%(self.dict_size/1000) in [0,1,2,3,4,5,6,7,8,9]:
                 stdout.write('\r['+'||'*int(tot_prog/(self.dict_size/10))+']'+str(round(tot_prog/self.dict_size*100,4))+'% ')
         stdout.write('\r 100.0%          '+str(tot_prog)+'          \n')
-        
-    
-    def threaded(self):
-        self.count=0
-        num_segs=mp.cpu_count()
-        thread_list=[]
-        segs=[x*int(len(self.dictionary)/num_segs) for x in range(num_segs+1)] 
-        segs[-1]=self.dict_size
-    
-        things_todo=[[self.threaded_build,'Segment'+str(segs[i])+str(segs[i+1]),(segs[i],segs[i+1])] for i in range(num_segs)]
-        things_todo.append([self.load_bar,'Progresbar'])
-    
-        for i in range(len(things_todo)):
-            if len(things_todo[i])==3:  
-                t=th.Thread(target=things_todo[i][0],name=things_todo[i][1],args=things_todo[i][2])
-            elif len(things_todo[i])==2:
-                t=th.Thread(target=things_todo[i][0],name=things_todo[i][1])
-            t.start()
-            thread_list.append(t)
-    
-        for thread in thread_list:
-            thread.join()   
+
             
     def multi_proc(self):
         
