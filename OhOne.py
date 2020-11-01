@@ -19,9 +19,9 @@ class augmentext():
     def __init__(self, path_to_text=None,
                  dictionary=None,
                  dict_size=10**6,
-                 signs=[' ','.',',','-'],
+                 signs=[' ','.',',','-',':'],
                  list_of_supported_files=['.doc','.pdf','http:','https:','www.','.htm','.txt'],
-                 supported_chr=[chr(i) for i in range(32,127)]):
+                 supported_chr=[chr(i) for i in range(32,127)]+['ä','ü','ö','Ä','Ü','Ö']):
         self.somepath=path_to_text
         self.bib={}
         self.dict_size=dict_size
@@ -68,7 +68,7 @@ class augmentext():
     
     def drop_stuff(self,text): #
         supp_chr=self.supported_chr
-        new_text=[i for i in text if i in supp_chr]
+        new_text=[i if i in supp_chr else ' ' for i in text]
         return ''.join(new_text)
     
     def work_through(self):
@@ -154,41 +154,62 @@ class augmentext():
                        
          
     def add_words(self,liste):
-        if len(liste)>1000: 
+        if len(liste)>100: 
             self.threaded([self.add_words,'addwords',liste])
         else:
             stdout.write('\n\nwith worker '+str(os.getpid())+'\n')
             for i in liste:
+                i=self.word_it(i)
                 in_yet, target=self.is_it_in_yet(i)
                 if in_yet==True:
+                    to_list=self.dictionary[target]
+                    if int in [type(in_list) for in_list in to_list]:
+                        for pos, val in enumerate(to_list):#predefining structur would be very helpful ti keep checking overhead in bay
+                            if type(val)==int:
+                                to_list[pos]+=1
+                                break
+                    else:
+                        to_list.append(1)
+                        
+                    self.dictionary[target]=to_list
                     continue#stdout.write('\r'+i+' is already in dictionary at position '+str(target)+'\n')
                 else:
-                    if type(self.dictionary)=='multiprocessing.managers.ListProxy':                  
-                        self.lock.acquire()
+                    # if type(self.dictionary)==type(mp.Manager().list()):
+                    #     self.lock.acquire()
                     try:
                         if target<self.dict_size/2:
                             for k in range(target,self.dict_size-1):
                                 if self.dictionary[k]==[]:
                                     if k!=target:
-                                        self.dictionary[target].append((i,k)) 
-                                    self.dictionary[k].append(i) 
+                                        to_list=self.dictionary[target]
+                                        to_list.append((i,k))
+                                        self.dictionary[target]=to_list 
+                                    to_list=self.dictionary[k]
+                                    to_list.append(i)
+                                    to_list.append(1)
+                                    self.dictionary[k]=to_list#over complicated by multiprocessing.managers.ListProxy
                                     stdout.write('\r'+i+' added at Position '+str(k)+'\n')
                                     break
                         else:
                             for k in range(target,-1,-1):
                                 if self.dictionary[k]==[]:
                                     if k!=target:
-                                        self.dictionary[target].append((i,k)) 
-                                    self.dictionary[k]=[i]
+                                        to_list=self.dictionary[target]
+                                        to_list.append((i,k))
+                                        self.dictionary[target]=to_list 
+                                    to_list=self.dictionary[k]
+                                    to_list.append(i)
+                                    to_list.append(1)
+                                    self.dictionary[k]=to_list#over complicated by multiprocessing.managers.ListProxy
                                     stdout.write('\r'+i+' added at Position '+str(k)+'\n')
-                                    break   
+                                    break 
                     except:
                         self.dictionary.append([i])
                         pos=len(self.dictionary)-1
                         self.dictionary[target].append((i,pos))
                         stdout.write('\r'+i+' added at Position '+str(pos)+'\n')# if there are no open positiones anymore
-                    if type(self.dictionary)=='multiprocessing.managers.ListProxy':   
-                        self.lock.release()
+                    # if type(self.dictionary)==type(mp.Manager().list()):   
+                    #     self.lock.release()
     
     def threaded(self,func):
         num_threads=mp.cpu_count()
