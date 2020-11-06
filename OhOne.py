@@ -19,7 +19,7 @@ class augmentext():
     def __init__(self, path_to_text=None,
                  dictionary=None,
                  dict_size=10**6,
-                 signs=[' ','.',',','-',':'],
+                 signs=[' ','.',',','-',':',')'],
                  list_of_supported_files=['.doc','.pdf','http:','https:','www.','.htm','.txt'],
                  supported_chr=[chr(i) for i in range(32,127)]+['ä','ü','ö','Ä','Ü','Ö']):
         self.somepath=path_to_text
@@ -61,17 +61,37 @@ class augmentext():
         inter=txt.read().decode('utf8','ignore')
         txt.close()
         return inter 
-
+                       
+    def word_asstimator(self,string):           #trying to stemmanize long strings
+        alpha_chr=[chr(i) for i in range(97,123)]
+        clean_string=''
+        for i in string:
+            if i in alpha_chr:
+                clean_string+=i
+            else:
+                if clean_string!='':
+                    if clean_string[-1]==' ':
+                        pass
+                    else:
+                        clean_string+=' '
+        inter=clean_string.split(' ')
+        output_list=[]
+        for i in inter:
+            tf,_=self.is_it_in_yet(i)
+            if tf==True and len(i)>1:
+                output_list.append(i)
+        return output_list
+    
     def split_text(self,text,corpus=3): #Tokenizer
-        sep=[' ','.','\n']
-        return [text.split(i) for i in sep if i in text]
+        sep=[' ','.','\n','\t','\r']
+        return [text.split(i) for i in sep[:corpus] if i in text]
     
     def drop_stuff(self,text): #
         supp_chr=self.supported_chr
         new_text=[i if i in supp_chr else ' ' for i in text]
         return ''.join(new_text)
     
-    def work_through(self):
+    def work_through(self):#could be much more elaborarte 
         for key in self.bib.keys():
             self.bib[key]+=self.split_text(self.bib[key][0])
             print('text '+str(key)+' was seperated')        
@@ -150,21 +170,22 @@ class augmentext():
                         break
             return in_yet, pos
         else:
-            return False, pos
-                       
-         
+            return False, pos               
+            
+        
     def add_words(self,liste):
-        if len(liste)>100: 
+        self.seg_length=10000000
+        if len(liste)>self.seg_length: 
             self.threaded([self.add_words,'addwords',liste])
         else:
-            stdout.write('\n\nwith worker '+str(os.getpid())+'\n')
             for i in liste:
+                
                 i=self.word_it(i)
                 in_yet, target=self.is_it_in_yet(i)
                 if in_yet==True:
                     to_list=self.dictionary[target]
                     if int in [type(in_list) for in_list in to_list]:
-                        for pos, val in enumerate(to_list):#predefining structur would be very helpful ti keep checking overhead in bay
+                        for pos, val in enumerate(to_list):#predefining structur would be very helpful to keep checking overhead in bay
                             if type(val)==int:
                                 to_list[pos]+=1
                                 break
@@ -212,9 +233,13 @@ class augmentext():
                     #     self.lock.release()
     
     def threaded(self,func):
-        num_threads=mp.cpu_count()
-        segs=[x*int(len(func[2])/num_threads) for x in range(num_threads+1)]
-        segs[-1]=len(func[2])
+        if len(func)>2:
+            for i in range(2,len(func[2])):
+                if len(func[2])/i < self.seg_length:        
+                    num_threads=i
+                    break
+            segs=[x*int(len(func[2])/num_threads) for x in range(num_threads+1)]
+            segs[-1]=len(func[2])
         thread_list=[]
             
         for i in range(len(segs)-1):
@@ -223,10 +248,11 @@ class augmentext():
             elif len(func)==2:
                 t=th.Thread(target=func[0],name=func[1])
             t.start()
+            stdout.write('\n\nwith worker '+str(os.getpid())+'\n')
             thread_list.append(t)
     
-        # for thread in thread_list:
-        #     thread.join()     
+        for thread in thread_list:
+            thread.join()     
                           
     
     def build_dict(self,path='F:/Desktop/_AugmenText/dictionary/words.txt'): 
@@ -293,19 +319,19 @@ class augmentext():
 
             
     def multi_proc(self):
-        
+        import time
         self.count=mp.Manager().Value('i',0,lock=True)
         self.dictionary=mp.Manager().list(self.dictionary)
         
         num_segs=mp.cpu_count()
         if num_segs>5:
-            num_segs=int(input('Number of workers? Max is '+str(num_segs)+' '))
+            num_segs=int(input('Scanning for hash colissions with how many workers? Max is '+str(num_segs)+' '))
         segs=[x*int(self.dict_size/num_segs) for x in range(num_segs+1)]
         segs[-1]=self.dict_size
         process_list=[]
         things_todo=[[self.threaded_build,(segs[i],segs[i+1])] for i in range(num_segs)]
         things_todo.append([self.load_bar])
-        
+        s=time.time()
         for i in range(len(things_todo)):
             if len(things_todo[i])==2:  
                 p=mp.Process(target=things_todo[i][0],args=things_todo[i][1])
@@ -315,6 +341,8 @@ class augmentext():
             p.start()
         for process in process_list:
             process.join()
+        k=time.time()-s
+        stdout.write(str(num_segs)+' workers took '+str(int(k/60))+'min '+str(int(k%60))+'sec\n\n')
     
     def run(self):
         self.inputtype_detect()
@@ -323,8 +351,7 @@ class augmentext():
         self.build_dict()
         self.multi_proc()
 
-# if __name__ == "__main__":
-#     augmentext().run()        
+
         
         
 
