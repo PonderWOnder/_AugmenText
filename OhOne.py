@@ -5,16 +5,17 @@ Created on Tue Oct 13 09:37:08 2020
 @author: GROKA
 """
 import os
-#import time
+from sys import stdout
 import threading as th
 import multiprocessing as mp
 from urllib.request import urlopen
 from bs4 import BeautifulSoup as urlreader 
-from sys import stdout
+
 
 PYTHONHASHSEED=0
 
 class augmentext():
+    
     
     def __init__(self, path_to_text=None,
                  dictionary=None,
@@ -28,10 +29,11 @@ class augmentext():
         self.signs=signs
         self.list_of_supported_files=list_of_supported_files
         self.supported_chr=supported_chr
-        self.dirctionary=dictionary
+        self.dictionary=dictionary
         self.count=0
         self.lock=mp.Lock()
-     
+    
+        
     def dir_file_or_url(self,location):
         if any(phrase in location for phrase in self.list_of_supported_files):      #very brittle going to be updated
             return [location]
@@ -45,23 +47,28 @@ class augmentext():
                 return usefull_files
             except:
                 print('cant find anything usefull at location'+location)
-     
+    
+        
     def load_url_text(self,location): #URL
         response=urlopen(location)
         return urlreader(response.read(),'lxml').text
     
+    
     def load_worddoc_text(self,location):
         pass
     
+    
     def load_pdf_text(self,location):
         pass
+    
     
     def load_txt(self,location): #TXT
         txt=open(location,'rb')
         inter=txt.read().decode('utf8','ignore')
         txt.close()
         return inter 
-                       
+    
+                   
     def word_asstimator(self,string):           #trying to stemmanize long strings
         alpha_chr=[chr(i) for i in range(97,123)]
         clean_string=''
@@ -82,19 +89,23 @@ class augmentext():
                 output_list.append(i)
         return output_list
     
+    
     def split_text(self,text,corpus=3): #Tokenizer
         sep=[' ','.','\n','\t','\r']
         return [text.split(i) for i in sep[:corpus] if i in text]
+    
     
     def drop_stuff(self,text): #
         supp_chr=self.supported_chr
         new_text=[i if i in supp_chr else ' ' for i in text]
         return ''.join(new_text)
     
+    
     def work_through(self):#could be much more elaborarte 
         for key in self.bib.keys():
             self.bib[key]+=self.split_text(self.bib[key][0])
             print('text '+str(key)+' was seperated')        
+    
     
     def add_to_bib(self, path_list):
         for i in path_list:
@@ -116,6 +127,7 @@ class augmentext():
                     print('resource '+i+' is now available under '+str(dic_hash))
                 except:
                     print('couldn\'t find resource '+i)
+    
         
     def inputtype_detect(self):
         op_sys=os.name
@@ -140,6 +152,7 @@ class augmentext():
         
         elif any(type(self.somepath) is supported_types for supported_types in [None,str,list,dict])==False:
             print('Format is not recognizable')
+    
         
     def word_it(self,word):
         if len(word)>1:    
@@ -149,6 +162,7 @@ class augmentext():
                 else:
                     break
         return word.lower()
+    
     
     def hash_it(self,word):
         return hash(self.word_it(word))%self.dict_size
@@ -231,6 +245,7 @@ class augmentext():
                         stdout.write('\r'+i+' added at Position '+str(pos)+'\n')# if there are no open positiones anymore
                     # if type(self.dictionary)==type(mp.Manager().list()):   
                     #     self.lock.release()
+    
     
     def threaded(self,func):
         if len(func)>2:
@@ -343,6 +358,7 @@ class augmentext():
             process.join()
         k=time.time()-s
         stdout.write(str(num_segs)+' workers took '+str(int(k/60))+'min '+str(int(k%60))+'sec\n\n')
+    
     
     def run(self):
         self.inputtype_detect()
