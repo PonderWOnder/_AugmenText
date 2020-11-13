@@ -8,6 +8,7 @@ import os
 from sys import stdout
 import threading as th
 import multiprocessing as mp
+import time
 from urllib.request import urlopen
 from bs4 import BeautifulSoup as urlreader 
 
@@ -19,19 +20,25 @@ class augmentext():
     
     def __init__(self, path_to_text=None,
                  dictionary=None,
+                 syn_loc='F:\Desktop\_AugmenText\dictionary\Syn_Ant.txt',
                  dict_size=10**6,
                  signs=[' ','.',',','-',':',')'],
                  list_of_supported_files=['.doc','.pdf','http:','https:','www.','.htm','.txt'],
                  supported_chr=[chr(i) for i in range(32,127)]+['ä','ü','ö','Ä','Ü','Ö']):
-        self.somepath=path_to_text
-        self.bib={}
-        self.dict_size=dict_size
-        self.signs=signs
-        self.list_of_supported_files=list_of_supported_files
-        self.supported_chr=supported_chr
-        self.dictionary=dictionary
-        self.count=0
-        self.lock=mp.Lock()
+        self.somepath=path_to_text#should be list of URLs pointing to text of some sort
+        self.syn_ant=syn_loc
+        self.bib={}#will contain bibliography
+        self.dict_size=dict_size#predefines size of hashtable dictionary (will be extended automatically if full)
+        self.signs=signs#no idea if we need them but should be used for single words if they are distorted on th end
+        self.list_of_supported_files=list_of_supported_files#nomen est omen
+        self.supported_chr=supported_chr#nomen est omen
+        self.dictionary=dictionary#list sturcture to be used as hashed list
+        self.count=0#just exists for loading bar function no greater us so far
+        self.lock=mp.Lock()#function to coordinate dictioary writes in multiprocessing enviorment
+        self.vector_size=0
+        '''depented of the amount of individual words used in text. 
+        Since transformations are applied to text value most likely 
+        will be estimated by propabilities of transforamtion'''
     
         
     def dir_file_or_url(self,location):
@@ -69,8 +76,10 @@ class augmentext():
         return inter 
     
                    
-    def word_asstimator(self,string):           #trying to stemmanize long strings
-        alpha_chr=[chr(i) for i in range(97,123)]
+    def word_asstimator(self,string): 
+        '''handles Links in text by spliting them into words present 
+        in the dictionary and droping everything else'''
+        alpha_chr=[chr(i) for i in range(97,123)]#only lower letters
         clean_string=''
         for i in string:
             if i in alpha_chr:
@@ -87,21 +96,26 @@ class augmentext():
             tf,_=self.is_it_in_yet(i)
             if tf==True and len(i)>1:
                 output_list.append(i)
-        return output_list
+        self.add_words(output_list,0)
     
     
-    def split_text(self,text,corpus=3): #Tokenizer
+    def split_text(self,text,corpus=3): 
+        '''Simplest Tokenizer we could think of! Will be replaced with NLTK'''
         sep=[' ','.','\n','\t','\r']
         return [text.split(i) for i in sep[:corpus] if i in text]
     
     
-    def drop_stuff(self,text): #
+    def drop_stuff(self,text): 
+        '''Checks text for non predefined ASCII values 
+        and replaces them with an empty string'''
         supp_chr=self.supported_chr
         new_text=[i if i in supp_chr else ' ' for i in text]
         return ''.join(new_text)
     
     
-    def work_through(self):#could be much more elaborarte 
+    def work_through(self):
+        '''Applies tokenizer to extend bibliography 
+        entries by tokenized representations of text''' 
         for key in self.bib.keys():
             self.bib[key]+=self.split_text(self.bib[key][0])
             print('text '+str(key)+' was seperated')        
@@ -130,8 +144,8 @@ class augmentext():
     
         
     def inputtype_detect(self):
-        op_sys=os.name
-            
+        '''handles various different ways of supplying locations of text corpus
+        provided by URLs in self.somepath variable'''
         if self.somepath is None:
             self.somepath=str(input('Enter dir file or URL: '))
             self.somepath=self.dir_file_or_url(self.somepath)
@@ -155,6 +169,7 @@ class augmentext():
     
         
     def word_it(self,word):
+        '''Standardizes strings for hashing'''
         if len(word)>1:    
             while True:
                 if word[-1] in self.signs: #not good for dosages
@@ -165,10 +180,12 @@ class augmentext():
     
     
     def hash_it(self,word):
+        '''hashes previously standardized word to numerical hash or length dict_size'''
         return hash(self.word_it(word))%self.dict_size
         
     
     def is_it_in_yet(self,word):
+        '''Checks if word is already in dictionary'''
         word=self.word_it(word)
         pos=self.hash_it(word)
         loc=self.dictionary[pos]
@@ -187,7 +204,7 @@ class augmentext():
             return False, pos               
             
         
-    def add_words(self,liste):
+    def add_words(self,liste,occurrence=1):
         self.seg_length=10000000
         if len(liste)>self.seg_length: 
             self.threaded([self.add_words,'addwords',liste])
@@ -201,10 +218,13 @@ class augmentext():
                     if int in [type(in_list) for in_list in to_list]:
                         for pos, val in enumerate(to_list):#predefining structur would be very helpful to keep checking overhead in bay
                             if type(val)==int:
-                                to_list[pos]+=1
+                                to_list[pos]+=occurrence
+                                self.vector_size+=occurrence
                                 break
                     else:
-                        to_list.append(1)
+                        if occurrence>0:
+                            to_list.append(occurrence)
+                            self.vector_size+=occurrence
                         
                     self.dictionary[target]=to_list
                     continue#stdout.write('\r'+i+' is already in dictionary at position '+str(target)+'\n')
@@ -221,7 +241,9 @@ class augmentext():
                                         self.dictionary[target]=to_list 
                                     to_list=self.dictionary[k]
                                     to_list.append(i)
-                                    to_list.append(1)
+                                    if occurrence>0:
+                                        to_list.append(occurrence)
+                                        self.vector_size+=occurrence
                                     self.dictionary[k]=to_list#over complicated by multiprocessing.managers.ListProxy
                                     stdout.write('\r'+i+' added at Position '+str(k)+'\n')
                                     break
@@ -234,14 +256,20 @@ class augmentext():
                                         self.dictionary[target]=to_list 
                                     to_list=self.dictionary[k]
                                     to_list.append(i)
-                                    to_list.append(1)
+                                    if occurrence>0:
+                                        to_list.append(occurrence)
+                                        self.vector_size+=occurrence
                                     self.dictionary[k]=to_list#over complicated by multiprocessing.managers.ListProxy
                                     stdout.write('\r'+i+' added at Position '+str(k)+'\n')
                                     break 
                     except:
                         self.dictionary.append([i])
+                        if occurrence>0:
+                            self.dictionary[len(self.dictionary)-1].append(occurrence)
                         pos=len(self.dictionary)-1
-                        self.dictionary[target].append((i,pos))
+                        to_list=self.dictionary[target]
+                        to_list.append((i,pos))
+                        self.dictionary[target]=to_list
                         stdout.write('\r'+i+' added at Position '+str(pos)+'\n')# if there are no open positiones anymore
                     # if type(self.dictionary)==type(mp.Manager().list()):   
                     #     self.lock.release()
@@ -271,6 +299,10 @@ class augmentext():
                           
     
     def build_dict(self,path='F:/Desktop/_AugmenText/dictionary/words.txt'): 
+        '''Just maps words from line seperated txt 
+        provided in parameter path to hash postions 
+        in list self.dictionary.
+        Does not do any hash collission detection!'''
         words=open(path,'rb')
         txt=words.read().decode('utf8','ignore').split('\n')
         words.close()
@@ -282,7 +314,7 @@ class augmentext():
         
         self.dictionary=[]
         self.rejected=[]
-        for i in range(10**6):
+        for i in range(self.dict_size):
             self.dictionary.append([])
         x,k=0,0
         for i,y in liste:
@@ -300,6 +332,10 @@ class augmentext():
           
      
     def threaded_build(self,seg,seg2):
+        '''Detects collissions in segments of self.dictionary 
+        and maps them to empty positions within the segment.
+        should only be used if no other processes has altered 
+        self.dictionary'''
         x=0
         dude=self.dictionary[seg:seg2]
         stdout.write('segment '+str(seg)+' to '+str(seg2)+' has started with worker '+str(os.getpid())+'\n')
@@ -325,39 +361,203 @@ class augmentext():
         stdout.write('\rsegment '+str(seg)+' to '+str(seg2)+' has finished\n')
     
     
-    def load_bar(self):
-        while self.count.value<self.dict_size:           
+    def syno_ant(self):
+        '''far to long function to transform synonym dictionary provided under
+        the location parameter into useable input to append self.dictionary with
+        synonym capabilities'''
+        syn_loc=self.syn_ant
+        txt=open(syn_loc,'rb')
+        inter=txt.read().decode('utf8','ignore')
+        txt.close()
+        window_len=4
+        sliding=''
+        entries=[]
+        record=False
+        word=-1
+        for i in inter:
+            if len(sliding)>window_len:
+                sliding=sliding[1:]
+            sliding+=i
+            if '\nKEY:' == sliding:
+                record=True
+                i=sliding
+                entries.append('')
+                word+=1
+            elif '\r\n=' in sliding:
+                record=False
+            if record==True:
+                if i=='_':
+                    i=' '
+                entries[word]+=i.lower()
+        
+        stuff_to_drop=len(entries)      
+        for num,entry in enumerate(entries[:stuff_to_drop]):
+            sliding=''
+            entries.append('')
+            for i in entry:
+                if len(sliding)>window_len:
+                    sliding=sliding[1:]
+                if i not in ['\r','\n']:
+                    sliding+=i
+                    entries[stuff_to_drop+num]+=i.lower()
+                if 'key: ' == sliding:
+                    entries[stuff_to_drop+num]=entries[stuff_to_drop+num][:-1*(window_len+1)]
+                elif 'syn: ' == sliding:
+                    entries[stuff_to_drop+num]=entries[stuff_to_drop+num][:-1*(window_len+1)]
+                elif 'ant: ' == sliding:
+                    entries[stuff_to_drop+num]=entries[stuff_to_drop+num][:-1*(window_len+1)]
+        entries=entries[stuff_to_drop:]
+        
+        for num,entry in enumerate(entries[:stuff_to_drop]):
+            to_stomp=0
+            in_turn,to_turn=0,0
+            two_evils=['[','{','\\']
+            count=False
+            end=None
+            entries.append('')
+            for pos,i in enumerate(entry):
+                if i in two_evils and i!=end:
+                    if len(two_evils)!=1:
+                        count=True
+                        in_turn+=1
+                        two_evils=[i]
+                        if i=='[':
+                            end=']'
+                        elif i=='{':
+                            end='}'
+                        elif i=='\\':
+                            end='\\'
+                    else:
+                        in_turn+=1
+                
+                if count==True:
+                    to_stomp+=1
+                    
+                entries[stuff_to_drop+num]+=i.lower()
+                if i==end and to_stomp>1 or i=='.':
+                    to_turn+=1
+                    if in_turn==to_turn or i=='.':
+                        entries[stuff_to_drop+num]=entries[stuff_to_drop+num][:-1*(to_stomp+1)]
+                        count=False
+                        to_stomp=0
+                        two_evils=['[','{','\\']
+                        in_turn,to_turn=0,0
+                        end=None
+                    if i=='.':
+                        entries[stuff_to_drop+num]+='. '
+        entries=entries[stuff_to_drop:]
+        
+        print('Lines run: '+str(stuff_to_drop)+'\n')
+
+        self.syn_list=[]
+        print('Dropped Lines:',end=' ')
+        for num,entry in enumerate(entries):
+            line=[i for i in entry]
+            if '\\' in line:
+                print(str(num),end=', ')
+            elif '[' in line:
+                print(str(num),end=', ')
+            elif ']' in line:
+                print(str(num),end=', ')
+            elif '{' in line:
+                print(str(num),end=', ')
+            elif '}' in line:
+                print(str(num),end=', ')
+            else:
+                self.syn_list.append(entry)
+        print('\n')
+    
+    
+    def add_syns(self,seg1,seg2):
+        inter_list=[]
+        for stuff in self.syn_list[seg1:seg2]:
+            stuff=''.join([i for i in stuff if i!=' '])
+            stuff=stuff.split('.')[:-1]
+            stuffed=[]
+            for stuffing in stuff:
+                stuffing=stuffing.split(',')
+                stuffed.append(stuffing)
+            stuffed[0]=stuffed[0][0]
+            inter_list.append(stuffed)
+        way_to_go=len(inter_list)    
+        print('\nLines returned: '+str(way_to_go)) 
+        for prog,word in enumerate(inter_list):
+            where_to=self.hash_it(word[0])
+            to_list=self.dictionary[where_to]
+            from_list=[]
+            for tab in word[1:]:
+                self.add_words(tab,0)
+                from_list.append([self.hash_it(i) for i in tab])
+            to_list.append(from_list)
+            self.dictionary[where_to]=to_list
+            if prog%way_to_go/100==0:                           
+                self.lock.acquire()
+                self.count.value+=way_to_go/100
+                self.lock.release()
+    
+    
+        def find_syn(self,word):
+            where=self.hash_it(word)
+            info=self.dictionary[where]
+            if list in [type(i) for i in info]:
+                for num,i in enumerate(info):
+                    if type(i)==list:
+                        return i[0]
+            else:
+                stdout.write('No Synonyms found for '+word)
+
+    
+    def load_bar(self,length):
+        '''Just a for fun progressbar for initial hash collission detection'''
+        while self.count.value<length:           
             tot_prog=self.count.value
-            if tot_prog%(self.dict_size/1000) in [0,1,2,3,4,5,6,7,8,9]:
-                stdout.write('\r['+'||'*int(tot_prog/(self.dict_size/10))+']'+str(round(tot_prog/self.dict_size*100,4))+'% ')
+            if tot_prog%(length/1000) in [0,1,2,3,4,5,6,7,8,9]:
+                stdout.write('\r['+'||'*int(tot_prog/(length/10))+']'+str(round(tot_prog/length*100,4))+'% ')
         stdout.write('\r 100.0%          '+str(tot_prog)+'          \n')
 
             
-    def multi_proc(self):
-        import time
+    def multi_proc(self,things_todo):
         self.count=mp.Manager().Value('i',0,lock=True)
-        self.dictionary=mp.Manager().list(self.dictionary)
+        if type(self.dictionary)!=type(mp.Manager().list()): 
+            self.dictionary=mp.Manager().list(self.dictionary)
         
-        num_segs=mp.cpu_count()
-        if num_segs>5:
-            num_segs=int(input('Scanning for hash colissions with how many workers? Max is '+str(num_segs)+' '))
-        segs=[x*int(self.dict_size/num_segs) for x in range(num_segs+1)]
-        segs[-1]=self.dict_size
         process_list=[]
-        things_todo=[[self.threaded_build,(segs[i],segs[i+1])] for i in range(num_segs)]
-        things_todo.append([self.load_bar])
         s=time.time()
-        for i in range(len(things_todo)):
-            if len(things_todo[i])==2:  
-                p=mp.Process(target=things_todo[i][0],args=things_todo[i][1])
-            elif len(things_todo[i])==1:
-                 p=mp.Process(target=things_todo[i][0])
+        for task in things_todo:
+            if len(task)==2:  
+                p=mp.Process(target=task[0],args=task[1])
+            elif len(task)==1:
+                 p=mp.Process(target=task[0])
             process_list.append(p)
             p.start()
         for process in process_list:
             process.join()
         k=time.time()-s
-        stdout.write(str(num_segs)+' workers took '+str(int(k/60))+'min '+str(int(k%60))+'sec\n\n')
+        stdout.write(str(self.num_segs)+' workers took '+str(int(k/60))+'min '+str(int(k%60))+'sec\n\n')
+    
+    
+    def create_task_list(self):
+        stuff_todo=[]
+        self.num_segs=mp.cpu_count()
+        if self.num_segs>5:
+            self.num_segs=int(input('How many CPU-Cores shall be utilized? Max is '+str(self.num_segs)+' '))
+        segs=[x*int(self.dict_size/self.num_segs) for x in range(self.num_segs+1)]
+        segs[-1]=self.dict_size
+        things_todo=[[self.threaded_build,(segs[i],segs[i+1])] for i in range(self.num_segs)]
+        things_todo.append([self.load_bar,(self.dict_size,)])
+        stuff_todo.append(things_todo)
+        things_todo=[]
+        things_todo=[[self.add_words,(self.bib[item][1],)] for item in self.bib]  
+        stuff_todo.append(things_todo)
+        things_todo=[]
+        syn_dic=len(self.syn_list)
+        segs=[x*int(syn_dic/self.num_segs) for x in range(self.num_segs+1)]
+        segs[-1]=syn_dic
+        things_todo=[[self.add_syns,(segs[i],segs[i+1])] for i in range(self.num_segs)]  
+        things_todo.append([self.load_bar,(len(self.syn_list),)])
+        stuff_todo.append(things_todo)
+        return stuff_todo
+        
     
     
     def run(self):
@@ -365,7 +565,13 @@ class augmentext():
         self.add_to_bib(self.somepath) 
         self.work_through()
         self.build_dict()
-        self.multi_proc()
+        self.syno_ant()
+        stuff_todo=self.create_task_list()
+        for things_todo in stuff_todo:
+            self.multi_proc(things_todo)
+        input(':')
+
+        
 
 
         

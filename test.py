@@ -8,6 +8,4 @@ if __name__ == "__main__":
            'https://en.wikipedia.org/wiki/Tokenization_(lexical_analysis)']
     sometest=augmentext(liste)
     sometest.run()
-    for item in sometest.bib:
-        sometest.add_words(sometest.bib[item][1])
 
