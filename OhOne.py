@@ -20,7 +20,7 @@ class augmentext():
     
     def __init__(self, path_to_text=None,
                  dictionary=None,
-                 syn_loc='F:\Desktop\_AugmenText\dictionary\Syn_Ant.txt',
+                 syn_loc=os.path.abspath('dictionary\Syn_Ant.txt'),
                  dict_size=10**6,
                  signs=[' ','.',',','-',':',')'],
                  list_of_supported_files=['.doc','.pdf','http:','https:','www.','.htm','.txt'],
@@ -299,7 +299,7 @@ class augmentext():
             thread.join()     
                           
     
-    def build_dict(self,path='F:/Desktop/_AugmenText/dictionary/words.txt'): 
+    def build_dict(self,path=os.path.abspath('dictionary/words.txt')): 
         '''Just maps words from line seperated txt 
         provided in parameter path to hash postions 
         in list self.dictionary.
