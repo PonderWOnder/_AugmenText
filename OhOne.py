@@ -185,7 +185,8 @@ class augmentext():
         
     
     def is_it_in_yet(self,word):
-        '''Checks if word is already in dictionary'''
+        '''Checks if word is already in dictionary and returns its position 
+        also considering hash collissions if word is already in dic'''
         word=self.word_it(word)
         pos=self.hash_it(word)
         loc=self.dictionary[pos]
@@ -245,7 +246,7 @@ class augmentext():
                                         to_list.append(occurrence)
                                         self.vector_size+=occurrence
                                     self.dictionary[k]=to_list#over complicated by multiprocessing.managers.ListProxy
-                                    stdout.write('\r'+i+' added at Position '+str(k)+'\n')
+                                    #stdout.write('\r'+i+' added at Position '+str(k)+'\n')
                                     break
                         else:
                             for k in range(target,-1,-1):
@@ -260,7 +261,7 @@ class augmentext():
                                         to_list.append(occurrence)
                                         self.vector_size+=occurrence
                                     self.dictionary[k]=to_list#over complicated by multiprocessing.managers.ListProxy
-                                    stdout.write('\r'+i+' added at Position '+str(k)+'\n')
+                                    #stdout.write('\r'+i+' added at Position '+str(k)+'\n')
                                     break 
                     except:
                         self.dictionary.append([i])
@@ -447,7 +448,7 @@ class augmentext():
                         entries[stuff_to_drop+num]+='. '
         entries=entries[stuff_to_drop:]
         
-        print('Lines run: '+str(stuff_to_drop)+'\n')
+        print(str(stuff_to_drop)+' Synonyms found in '+syn_loc+'!\n')
 
         self.syn_list=[]
         print('Dropped Lines:',end=' ')
@@ -470,7 +471,8 @@ class augmentext():
     
     def add_syns(self,seg1,seg2):
         inter_list=[]
-        for stuff in self.syn_list[seg1:seg2]:
+        working_on=self.syn_list[seg1:seg2]
+        for stuff in working_on:
             stuff=''.join([i for i in stuff if i!=' '])
             stuff=stuff.split('.')[:-1]
             stuffed=[]
@@ -478,12 +480,15 @@ class augmentext():
                 stuffing=stuffing.split(',')
                 stuffed.append(stuffing)
             stuffed[0]=stuffed[0][0]
+            stdout.write('\n'+stuffed[0])
             inter_list.append(stuffed)
-        way_to_go=len(inter_list)    
-        print('\nLines returned: '+str(way_to_go)) 
+        way_to_go=len(inter_list)
+        
         for prog,word in enumerate(inter_list):
-            where_to=self.hash_it(word[0])
+            in_yet,where_to=self.is_it_in_yet(word[0])
             to_list=self.dictionary[where_to]
+            if to_list==[]:
+                to_list.append(word[0])
             from_list=[]
             for tab in word[1:]:
                 self.add_words(tab,0)
@@ -512,14 +517,12 @@ class augmentext():
         while self.count.value<length:           
             tot_prog=self.count.value
             if tot_prog%(length/1000) in [0,1,2,3,4,5,6,7,8,9]:
-                stdout.write('\r['+'||'*int(tot_prog/(length/10))+']'+str(round(tot_prog/length*100,4))+'% ')
-        stdout.write('\r 100.0%          '+str(tot_prog)+'          \n')
+                stdout.write('\rLoading'+' ['+'||'*int(tot_prog/(length/10))+']'+str(round(tot_prog/length*100,4))+'% ')
+        stdout.write('\r100.0%\t'+str(tot_prog)+'\t\t\n')
 
             
     def multi_proc(self,things_todo):
         self.count=mp.Manager().Value('i',0,lock=True)
-        if type(self.dictionary)!=type(mp.Manager().list()): 
-            self.dictionary=mp.Manager().list(self.dictionary)
         
         process_list=[]
         s=time.time()
@@ -533,7 +536,7 @@ class augmentext():
         for process in process_list:
             process.join()
         k=time.time()-s
-        stdout.write(str(self.num_segs)+' workers took '+str(int(k/60))+'min '+str(int(k%60))+'sec\n\n')
+        stdout.write(str(len(process_list))+' processes took '+str(int(k/60))+'min '+str(int(k%60))+'sec\n\n')
     
     
     def create_task_list(self):
@@ -541,6 +544,10 @@ class augmentext():
         self.num_segs=mp.cpu_count()
         if self.num_segs>5:
             self.num_segs=int(input('How many CPU-Cores shall be utilized? Max is '+str(self.num_segs)+' '))
+        
+        if type(self.dictionary)!=type(mp.Manager().list()): 
+            self.dictionary=mp.Manager().list(self.dictionary)
+            
         segs=[x*int(self.dict_size/self.num_segs) for x in range(self.num_segs+1)]
         segs[-1]=self.dict_size
         things_todo=[[self.threaded_build,(segs[i],segs[i+1])] for i in range(self.num_segs)]
@@ -549,6 +556,10 @@ class augmentext():
         things_todo=[]
         things_todo=[[self.add_words,(self.bib[item][1],)] for item in self.bib]  
         stuff_todo.append(things_todo)
+        
+        if type(self.syn_list)!=type(mp.Manager().list()): 
+            self.syn_list=mp.Manager().list(self.syn_list)
+        
         things_todo=[]
         syn_dic=len(self.syn_list)
         segs=[x*int(syn_dic/self.num_segs) for x in range(self.num_segs+1)]
