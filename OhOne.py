@@ -9,6 +9,7 @@ from sys import stdout
 import threading as th
 import multiprocessing as mp
 import time
+import hashlib
 from urllib.request import urlopen
 from bs4 import BeautifulSoup as urlreader 
 
@@ -181,7 +182,8 @@ class augmentext():
     
     def hash_it(self,word):
         '''hashes previously standardized word to numerical hash or length dict_size'''
-        return hash(self.word_it(word))%self.dict_size
+        var=str.encode(self.word_it(word))
+        return int(hashlib.md5(var).hexdigest(),16)%self.dict_size
         
     
     def is_it_in_yet(self,word):
@@ -513,7 +515,7 @@ class augmentext():
 
     
     def load_bar(self,length):
-        '''Just a for fun progressbar for initial hash collission detection'''
+        '''Just a for fun progressbar for list based multiprocessing tasks'''
         while self.count.value<length:           
             tot_prog=self.count.value
             if tot_prog%(length/1000) in [0,1,2,3,4,5,6,7,8,9]:
@@ -553,20 +555,21 @@ class augmentext():
         things_todo=[[self.threaded_build,(segs[i],segs[i+1])] for i in range(self.num_segs)]
         things_todo.append([self.load_bar,(self.dict_size,)])
         stuff_todo.append(things_todo)
-        things_todo=[]
-        things_todo=[[self.add_words,(self.bib[item][1],)] for item in self.bib]  
-        stuff_todo.append(things_todo)
         
-        if type(self.syn_list)!=type(mp.Manager().list()): 
-            self.syn_list=mp.Manager().list(self.syn_list)
+        # things_todo=[]
+        # things_todo=[[self.add_words,(self.bib[item][1],)] for item in self.bib]  
+        # stuff_todo.append(things_todo)
         
-        things_todo=[]
-        syn_dic=len(self.syn_list)
-        segs=[x*int(syn_dic/self.num_segs) for x in range(self.num_segs+1)]
-        segs[-1]=syn_dic
-        things_todo=[[self.add_syns,(segs[i],segs[i+1])] for i in range(self.num_segs)]  
-        things_todo.append([self.load_bar,(len(self.syn_list),)])
-        stuff_todo.append(things_todo)
+        # if type(self.syn_list)!=type(mp.Manager().list()): 
+        #     self.syn_list=mp.Manager().list(self.syn_list)
+        
+        # things_todo=[]
+        # syn_dic=len(self.syn_list)
+        # segs=[x*int(syn_dic/self.num_segs) for x in range(self.num_segs+1)]
+        # segs[-1]=syn_dic
+        # things_todo=[[self.add_syns,(segs[i],segs[i+1])] for i in range(self.num_segs)]  
+        # things_todo.append([self.load_bar,(len(self.syn_list),)])
+        # stuff_todo.append(things_todo)
         return stuff_todo
         
     
@@ -581,6 +584,8 @@ class augmentext():
         for things_todo in stuff_todo:
             self.multi_proc(things_todo)
         input(':')
+        import pickle
+        pickle.dump(list(self.dictionary), open('output.txt', 'wb'))
 
         
 
