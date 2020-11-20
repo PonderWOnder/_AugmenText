@@ -32,7 +32,7 @@ class augmentext():
         self.signs=signs#no idea if we need them but should be used for single words if they are distorted on th end
         self.list_of_supported_files=list_of_supported_files#nomen est omen
         self.supported_chr=supported_chr#nomen est omen
-        self.dictionary=dictionary#list sturcture to be used as hashed list
+        self.dictionary=dictionary  #list sturcture to be used as hashed list
         self.count=0#just exists for loading bar function no greater us so far
         self.lock=mp.Lock()#function to coordinate dictioary writes in multiprocessing enviorment
         self.vector_size=0
@@ -471,6 +471,7 @@ class augmentext():
     
     def add_syns(self,seg1,seg2):
         inter_list=[]
+        stdout.write('segment '+str(seg1)+' to '+str(seg2)+' has started with worker '+str(os.getpid())+'\n')
         working_on=self.syn_list[seg1:seg2]
         for stuff in working_on:
             stuff=''.join([i for i in stuff if i!=' '])
@@ -479,13 +480,18 @@ class augmentext():
             for stuffing in stuff:
                 stuffing=stuffing.split(',')
                 stuffed.append(stuffing)
-            stuffed[0]=stuffed[0][0]
-            stdout.write('\n'+stuffed[0])
+            stuffed[0]=self.word_it(stuffed[0][0])
+            #stdout.write('\n'+stuffed[0])
             inter_list.append(stuffed)
-        way_to_go=len(inter_list)
+            way_to_go=len(inter_list)
+            stdout.write('\r'+str(way_to_go)+' '+
+                         str(len(working_on))+
+                         (' False',' True ')[way_to_go==len(working_on)])
+        print('\n')
         
         for prog,word in enumerate(inter_list):
             in_yet,where_to=self.is_it_in_yet(word[0])
+            stdout.write(('False','True')[in_yet]+' '+str(where_to)+' '+str(prog)+' '+word[0])
             to_list=self.dictionary[where_to]
             if to_list==[]:
                 to_list.append(word[0])
@@ -495,10 +501,12 @@ class augmentext():
                 from_list.append([self.hash_it(i) for i in tab])
             to_list.append(from_list)
             self.dictionary[where_to]=to_list
-            if prog%way_to_go/100==0:                           
+            stdout.write('\nwrote line ')
+            if prog%int(way_to_go/100)==0:                           
                 self.lock.acquire()
                 self.count.value+=way_to_go/100
                 self.lock.release()
+            stdout.write(str(where_to))
     
     
         def find_syn(self,word):
@@ -553,19 +561,19 @@ class augmentext():
         things_todo=[[self.threaded_build,(segs[i],segs[i+1])] for i in range(self.num_segs)]
         things_todo.append([self.load_bar,(self.dict_size,)])
         stuff_todo.append(things_todo)
+        
         things_todo=[]
         things_todo=[[self.add_words,(self.bib[item][1],)] for item in self.bib]  
         stuff_todo.append(things_todo)
         
         if type(self.syn_list)!=type(mp.Manager().list()): 
             self.syn_list=mp.Manager().list(self.syn_list)
-        
         things_todo=[]
         syn_dic=len(self.syn_list)
         segs=[x*int(syn_dic/self.num_segs) for x in range(self.num_segs+1)]
         segs[-1]=syn_dic
         things_todo=[[self.add_syns,(segs[i],segs[i+1])] for i in range(self.num_segs)]  
-        things_todo.append([self.load_bar,(len(self.syn_list),)])
+        #things_todo.append([self.load_bar,(len(self.syn_list),)])
         stuff_todo.append(things_todo)
         return stuff_todo
         
