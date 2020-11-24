@@ -17,9 +17,6 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'Augmentext'
-copyright = '2020, Andreas Braun'
-author = 'Andreas Braun'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1'
