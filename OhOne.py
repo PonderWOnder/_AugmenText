@@ -35,13 +35,11 @@ class augmentext():
         self.dictionary=dictionary  #list sturcture to be used as hashed list
         self.count=0#just exists for loading bar function no greater us so far
         self.lock=mp.Lock()#function to coordinate dictioary writes in multiprocessing enviorment
-        self.vector_size=0
-        '''depented of the amount of individual words used in text. 
-        Since transformations are applied to text value most likely 
-        will be estimated by propabilities of transforamtion'''
+        self.vector_size=0#depented on the amount of individual words used in text.  Since transformations are applied to text value most likely will be estimated by propabilities of transforamtion
     
         
     def dir_file_or_url(self,location):
+        '''checks input type'''
         if any(phrase in location for phrase in self.list_of_supported_files):      #very brittle going to be updated
             return [location]
         else:
@@ -57,6 +55,7 @@ class augmentext():
     
         
     def load_url_text(self,location): #URL
+        '''handels urls'''
         response=urlopen(location)
         return urlreader(response.read(),'lxml').text
     
@@ -70,6 +69,7 @@ class augmentext():
     
     
     def load_txt(self,location): #TXT
+        '''handels txt files'''
         txt=open(location,'rb')
         inter=txt.read().decode('utf8','ignore')
         txt.close()
@@ -78,7 +78,12 @@ class augmentext():
                    
     def word_asstimator(self,string): 
         '''handles Links in text by spliting them into words present 
-        in the dictionary and droping everything else'''
+        in the dictionary and droping everything else
+        Parameters
+        ----------
+        string: str
+        
+        '''
         alpha_chr=[chr(i) for i in range(97,123)]#only lower letters
         clean_string=''
         for i in string:
@@ -206,6 +211,7 @@ class augmentext():
             
         
     def add_words(self,liste,occurrence=1):
+        '''adds tokens to the dictionary either counting their appearence or not'''
         self.seg_length=10000000
         if len(liste)>self.seg_length: 
             self.threaded([self.add_words,'addwords',liste])
@@ -277,6 +283,7 @@ class augmentext():
     
     
     def threaded(self,func):
+        '''Multi threading setup to handel processes in parallel'''
         if len(func)>2:
             for i in range(2,len(func[2])):
                 if len(func[2])/i < self.seg_length:        
@@ -470,6 +477,7 @@ class augmentext():
     
     
     def add_syns(self,seg1,seg2):
+        '''tailored to be passed into multi_proc modul for faster processing'''
         inter_list=[]
         stdout.write('segment '+str(seg1)+' to '+str(seg2)+' has started with worker '+str(os.getpid())+'\n')
         working_on=self.syn_list[seg1:seg2]
@@ -491,7 +499,9 @@ class augmentext():
         
         for prog,word in enumerate(inter_list):
             in_yet,where_to=self.is_it_in_yet(word[0])
-            stdout.write(('False','True')[in_yet]+' '+str(where_to)+' '+str(prog)+' '+word[0])
+            stdout.write((' False',' True')[in_yet]+
+                         ' '+str(where_to)+
+                         ' '+str(prog)+' '+word[0])
             to_list=self.dictionary[where_to]
             if to_list==[]:
                 to_list.append(word[0])
@@ -500,13 +510,12 @@ class augmentext():
                 self.add_words(tab,0)
                 from_list.append([self.hash_it(i) for i in tab])
             to_list.append(from_list)
+            self.lock.acquire()
             self.dictionary[where_to]=to_list
-            stdout.write('\nwrote line ')
             if prog%int(way_to_go/100)==0:                           
-                self.lock.acquire()
                 self.count.value+=way_to_go/100
-                self.lock.release()
-            stdout.write(str(where_to))
+            self.lock.release()
+            stdout.write(str(where_to)+'\n ')
     
     
         def find_syn(self,word):
@@ -530,6 +539,7 @@ class augmentext():
 
             
     def multi_proc(self,things_todo):
+        '''Multi processing setup to handel processes in parallel on different CPU Cores'''
         self.count=mp.Manager().Value('i',0,lock=True)
         
         process_list=[]
@@ -547,7 +557,8 @@ class augmentext():
         stdout.write(str(len(process_list))+' processes took '+str(int(k/60))+'min '+str(int(k%60))+'sec\n\n')
     
     
-    def create_task_list(self):
+    def create_task_list(self):#shits all over the place 
+        '''Actual execution order for multiprocessed tasks'''
         stuff_todo=[]
         self.num_segs=mp.cpu_count()
         if self.num_segs>5:
@@ -580,6 +591,7 @@ class augmentext():
     
     
     def run(self):
+        '''builds stuff'''
         self.inputtype_detect()
         self.add_to_bib(self.somepath) 
         self.work_through()
