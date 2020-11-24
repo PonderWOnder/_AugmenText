@@ -30,13 +30,13 @@ class GenerateSparseMatrix:
         Returns
         -------
         token_dict: Nested dictionary, with the token as first key,
-                    the document as 2nd key
-                    and the token count as value of the 2nd key.
+                the document as 2nd key
+                and the token count as value of the 2nd key.
 
-                    Structure:
-                        {Token: {Doc_ID: value_count}
-                    Example:
-                        {"This": {0: 1}}
+                Structure:
+                    {Token: {Doc_ID: value_count}
+                Example:
+                    {"This": {0: 1}}
         """
 
         token_dict = {}
@@ -63,7 +63,9 @@ class GenerateSparseMatrix:
         the document ID so the value shows the frequency of a specific token in
         a document.
 
-        :return: Sparse matrix of the Corpus object.
+        Returns
+        ------
+        sparse_matrix: Sparse matrix of the Corpus object.
         """
 
         # Create sparse tree
@@ -89,7 +91,9 @@ class GenerateSparseMatrix:
         """
         Calculates the average word length per document.
 
-        :return: Number of the average word length
+        Returns
+        -------
+        average_word_length: Number of the average word length
         """
 
         token_list = map(lambda x: nltk.word_tokenize(x), self.corpus_list)
@@ -105,7 +109,9 @@ class GenerateSparseMatrix:
         Finds ALL numbers per document, regardless of whether they stand alone
         or appear in a string. Multi-digit numbers are not separated.
 
-        :return: List with Lists per document, which contain the
+        Returns
+        -------
+        doc_numbers: List with Lists per document, which contain the
         specific document id and another list with the occuring numbers.
         """
         doc_numbers = []
@@ -127,7 +133,10 @@ class GenerateSparseMatrix:
         Checks, if a document starts with a capital letter and
         stores the boolean result.
 
-        :return: Boolean value:
+        Returns
+        -------
+        capital_letter:
+                    Boolean value:
                     True: Text begins with capital letter
                     False: Text does not begin with capital letter
         """
@@ -147,7 +156,9 @@ class GenerateSparseMatrix:
         Calculates the number of words per document, therefore the text
         is split in token, any token without any letters is excluded.
 
-        :return: Number of tokens per document
+        Returns
+        -------
+        token_count: Number of tokens per document
         """
 
         token_list = list(map(
@@ -167,9 +178,13 @@ class GenerateSparseMatrix:
         All characters per document are counted, either with or without
         whitespaces.
 
-        :param incl_whitespace: If True, whitespaces are also counted as
-                                characters
-        :return:                Number of characters per document
+        Parameters
+        ----------
+        incl_whitespace: If True, whitespaces are also
+                    counted as characters
+        Returns
+        -------
+        char_count:      Number of characters per document
         """
 
         # Count characters
@@ -190,7 +205,9 @@ class GenerateSparseMatrix:
         """
         Counts all special characters per document, excluding whitespaces.
 
-        :return: Number of special characters per document
+        Returns
+        -------
+        spec_char_count: Number of special characters per document
         """
 
         # Remove non-special characters
@@ -215,7 +232,9 @@ class GenerateSparseMatrix:
             "t2his":    1
             "42first":  2
 
-        :return: Number of numerical items per document.
+        Returns
+        -------
+        num_count: Number of numerical items per document.
         """
 
         # Remove non special characters
@@ -246,8 +265,10 @@ class GenerateSparseMatrix:
 
         TF = (Number of times term T appears in the particular row) / (number of terms in that row)
 
-        :param:
-        :return:
+
+        Returns
+        -------
+        tf:
         """
 
         tf = list(map(
@@ -274,7 +295,10 @@ class GenerateSparseMatrix:
         where the word is present.
 
         :param corpus: The corpus to analyse.
-        :return: The inverse document frequency.
+
+        Returns
+        -------
+        idf: The inverse document frequency.
         """
 
         n = len(self.documents)
@@ -294,22 +318,23 @@ class GenerateSparseMatrix:
 
             \\text{TF-IDF} = \\text{TF(t,d)} \\times \\text{IDF}(t)
 
-        :param corpus:
-        :return:
+        Returns
+        -------
+        tf_idf:
         """
 
         tf_list = self.term_frequency
         idf_list = self.inverse_document_frequency
-#        tf_idf = list(map(
-#            lambda tf: list(map(
-#                lambda idf_doc: list(map(
-#                    lambda idf: round(tf*idf, 3), idf_doc)), idf_list)), tf_list))
 
         tf_idf = list(map(
             lambda tf_doc: list(map(
                 lambda tf, idf: round(tf*idf, 3), tf_doc, idf_list)), tf_list))
 
         return tf_idf
+
+    def word_embedding(corpus):
+        # Research Method with good performance, less poweri
+        return 0
 
 
 if __name__ == '__main__':
@@ -341,8 +366,5 @@ if __name__ == '__main__':
     print(f'TF: {corp.term_frequency}')
     print(f'IDF: {corp.inverse_document_frequency}')
     print(f'TF-IDF: {corp.term_frequency_inverse_document_frequency}')
-
-
-
 
 
