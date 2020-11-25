@@ -17,9 +17,6 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'AugmenText'
-copyright = '2020, Jacqueline Schmatz'
-author = 'Jacqueline Schmatz'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1'
