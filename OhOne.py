@@ -9,11 +9,11 @@ from sys import stdout
 import threading as th
 import multiprocessing as mp
 import time
+from hashlib import md5
 from urllib.request import urlopen
 from bs4 import BeautifulSoup as urlreader 
 
 
-PYTHONHASHSEED=0
 
 class augmentext():
     
@@ -186,8 +186,8 @@ class augmentext():
     
     def hash_it(self,word):
         '''hashes previously standardized word to numerical hash or length dict_size'''
-        return hash(self.word_it(word))%self.dict_size
-        
+        return int(md5(str.encode(self.word_it(word))).hexdigest(),16)%self.dict_size
+    
     
     def is_it_in_yet(self,word):
         '''Checks if word is already in dictionary and returns its position 
