@@ -24,9 +24,6 @@ class GenerateSparseMatrix:
         This helper function returns a tree like representation of a given corpus
         by generating a nested dictionary.
 
-        Parameters
-        ----------
-
         Returns
         -------
         token_dict: Nested dictionary, with the token as first key,
@@ -45,6 +42,7 @@ class GenerateSparseMatrix:
             doc_text = val_list[0][0]
             self.corpus_list.append(doc_text)
             tokens = nltk.word_tokenize(doc_text)
+            self.corpus[doc][1] = tokens
 
             for tok in tokens:
                 token_count = tokens.count(tok)
@@ -86,8 +84,7 @@ class GenerateSparseMatrix:
         return sparse_matrix
 
     @ property
-    def average_word_length(self) -> List[int]:
-        # TODO: If input should be possible, type check needs to be added
+    def average_word_length(self) -> np.ndarray:
         """
         Calculates the average word length per document.
 
@@ -101,34 +98,35 @@ class GenerateSparseMatrix:
         average_word_length = list(map(
             lambda x: round(sum(map(len, x)) / len(x)), token_list))
 
-        return average_word_length
+        return np.asarray(average_word_length)
 
     @ property
-    def text_contains_numbers(self) -> np.array(List[int]):
+    def text_contains_numbers(self) -> np.array(List[float]):
         """
-        Finds ALL numbers per document, regardless of whether they stand alone
-        or appear in a string. Multi-digit numbers are not separated.
+        Finds ALL numbers per document, regardless of whether they
+        stand alone or appear in a string.
+        Multi-digit numbers and floats are not separated.
 
         Returns
         -------
         doc_numbers: List with Lists per document, which contain the
         specific document id and another list with the occuring numbers.
         """
-        doc_numbers = []
+        doc_numbers = np.empty(shape=(0, 1))
 
         for txt in self.corpus_list:
-            ints = re.findall(r'\d+', txt)
-            ints = list(map(int, ints))
+            numbers = re.findall(r"[-+]?\d*\.\d+|\d+", txt)
+            numbers = list(map(float, numbers))
 
-            if len(ints) < 1:
-                ints = [0]
+            if len(numbers) < 1:
+                numbers = [0]
 
-            doc_numbers.append(ints)
+            doc_numbers = np.append(doc_numbers, numbers)
 
         return doc_numbers
 
     @ property
-    def text_begins_with_capital_letter(self) -> List[bool]:
+    def text_begins_with_capital_letter(self) -> np.array:
         """
         Checks, if a document starts with a capital letter and
         stores the boolean result.
@@ -140,18 +138,19 @@ class GenerateSparseMatrix:
                     True: Text begins with capital letter
                     False: Text does not begin with capital letter
         """
-        capital_letter = []
+        capital_letter = np.empty(shape=(0, 1))
+#        capital_letter = []
 
         for doc in self.corpus_list:
             if doc[0].isupper():
-                capital_letter.append(True)
+                capital_letter = np.append(capital_letter, True)
             else:
-                capital_letter.append(False)
+                capital_letter = np.append(capital_letter, False)
 
         return capital_letter
 
     @ property
-    def number_of_words(self) -> List[int]:
+    def number_of_words(self) -> np.array:
         """
         Calculates the number of words per document, therefore the text
         is split in token, any token without any letters is excluded.
@@ -170,9 +169,9 @@ class GenerateSparseMatrix:
         # Count tokens
         token_count = list(map(lambda x: len(x), token_list))
 
-        return token_count
+        return np.asarray(token_count)
 
-    def number_of_characters(self, incl_whitespace=True) -> List[int]:
+    def number_of_characters(self, incl_whitespace: bool = True) -> np.array:
     # TODO: Define character
         """
         All characters per document are counted, either with or without
@@ -194,14 +193,14 @@ class GenerateSparseMatrix:
             char_count = list(map(lambda x: len(x.replace(" ", "")),
                                   self.corpus_list))
 
-        return char_count
+        return np.asarray(char_count)
 
     def number_of_stopwords(self):
         # TODO: stopwords define by nltk, tf-idf or both?
         return 0
 
     @ property
-    def number_of_special_characters(self) -> List[int]:
+    def number_of_special_characters(self) -> np.array:
         """
         Counts all special characters per document, excluding whitespaces.
 
@@ -221,10 +220,10 @@ class GenerateSparseMatrix:
         # Count special characters
         spec_char_count = list(map(lambda x: len(x), spec_char_count))
 
-        return spec_char_count
+        return np.asarray(spec_char_count)
 
     @ property
-    def number_of_numerical_items(self) -> List[int]:
+    def number_of_numerical_items(self) -> np.array:
         # TODO: Multi-Digits count as one?
         """
         Counts all numerical items. Elements of multi-digits will be counted
@@ -248,10 +247,10 @@ class GenerateSparseMatrix:
         # Count special characters
         num_count = list(map(lambda x: len(x), num_count))
 
-        return num_count
+        return np.asarray(num_count)
 
     @ property
-    def term_frequency(self) -> List[List[float]]:
+    def term_frequency(self) -> np.array:
         # TODO: Sentence?
         """
         Term frequency is simply the ratio of the count of a word present in a
@@ -276,10 +275,10 @@ class GenerateSparseMatrix:
                 lambda val: round(
                     val/len(doc_list), 3), doc_list)), self.sparse_matrix))
 
-        return tf
+        return np.asarray(tf)
 
     @ property
-    def inverse_document_frequency(self) -> List[float]:
+    def inverse_document_frequency(self) -> np.array:
         """
         The inverse document frequency, IDF, of a word is the log of the ratio
         of the total number of rows to the number of rows in which that word is
@@ -306,10 +305,10 @@ class GenerateSparseMatrix:
         idf = list(map(lambda x: round(
             np.log(n/np.count_nonzero(x, axis=0)), 3), tr_sparse_mat))
 
-        return idf
+        return np.asarray(idf)
 
     @ property
-    def term_frequency_inverse_document_frequency(self):
+    def term_frequency_inverse_document_frequency(self) -> np.array:
         """
         The Term Frequency-Inverse Document Frequency (TF-IDF) is the TF times the
         IDF:
@@ -330,10 +329,40 @@ class GenerateSparseMatrix:
             lambda tf_doc: list(map(
                 lambda tf, idf: round(tf*idf, 3), tf_doc, idf_list)), tf_list))
 
-        return tf_idf
+        return np.asarray(tf_idf)
+
+    def n_grams(self, n: int = 2):
+        """
+
+        :param n:
+        :return:
+        """
+
+#        n_grams = np.empty(shape=(0, 1))
+        n_grams = []
+
+        for idx, (doc_name, txt) in enumerate(self.corpus.items()):
+            tokens = txt[1]
+#            grams_doc = np.empty(shape=(0, 1))
+            grams_doc = []
+            for idx_tok, tok in enumerate(tokens):
+                end = idx_tok + n
+                grams = tokens[idx_tok:end]
+                print(idx_tok)
+                print(end)
+                print(grams)
+                grams = " ".join(grams)
+#                print(grams)
+#                grams_doc = np.append(grams_doc, grams)
+                grams_doc.append(grams)
+#               n = idx_tok + n
+#            n_grams = np.append(n_grams, grams_doc)
+            n_grams.append(grams_doc)
+        return n_grams
+
 
     def word_embedding(corpus):
-        # Research Method with good performance, less poweri
+        # Research Method with good performance, less power
         return 0
 
 
@@ -346,16 +375,26 @@ if __name__ == '__main__':
     ]
 
     corpus2 = {"dok1": [["This ? is the 42first document."], [""], [""], [""]],
-               "dok2": [["This document is the second document."], [""], [""], [""]],
+               "dok2": [["This document is 1.9 the second document."], [""], [""], [""]],
                "dok3": [["and t2his is the th6ird one."], [""], [""], [""]],
                "dok4": [["Is this the first document?"], [""], [""], [""]]}
 
-    corp = GenerateSparseMatrix(corpus2)
+    import os
+    directory = r'C:\Users\Jacky\PycharmProjects\_AugmenText\test'
+    corpus3 = {}
+    for file in os.listdir(directory):
+        file_path = os.path.join(directory, file)
+        text = open(file_path, "r").read()
+        filename = os.path.splitext(file)[0]
+        corpus3[filename] = [[text], [""], [""], [""]]
+        print(filename)
+        print(text)
+    corp = GenerateSparseMatrix(corpus3)
 
     print(f'Tokens: {corp.tokens}')
     print(corp.sparse_matrix)
     print(f'Average word length: {corp.average_word_length}')
-    print(f'Integers in corpus: {corp.text_contains_numbers}')
+    print(f'Numbers in corpus: {corp.text_contains_numbers}')
     print(f'Capital Letters: {corp.text_begins_with_capital_letter}')
     print(f'Number of Words: {corp.number_of_words}')
     print(f'Number of Characters: {corp.number_of_characters()}')
@@ -366,5 +405,6 @@ if __name__ == '__main__':
     print(f'TF: {corp.term_frequency}')
     print(f'IDF: {corp.inverse_document_frequency}')
     print(f'TF-IDF: {corp.term_frequency_inverse_document_frequency}')
+    print(f'N-grams: {corp.n_grams(n=3)}')
 
 
