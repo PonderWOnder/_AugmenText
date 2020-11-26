@@ -331,35 +331,43 @@ class GenerateSparseMatrix:
 
         return np.asarray(tf_idf)
 
-    def n_grams(self, n: int = 2):
+    def n_grams(self, n: int = 2) -> List[List[str]]:
+        """
+        Uses the tokens of the documents to create N-token sequences
+        of words.
+
+        Example with n = 2:
+            Text:   According to a recent  American study food allergies ...
+            Sequences: "According to", "to a", "a recent", "recent American",..
+
+        Parameters
+        ----------
+        n: Length of the sequences
+
+        Returns
+        -------
+        List with lists per document, containing the sequences
         """
 
-        :param n:
-        :return:
-        """
-
-#        n_grams = np.empty(shape=(0, 1))
         n_grams = []
 
         for idx, (doc_name, txt) in enumerate(self.corpus.items()):
             tokens = txt[1]
-#            grams_doc = np.empty(shape=(0, 1))
             grams_doc = []
+
             for idx_tok, tok in enumerate(tokens):
                 end = idx_tok + n
                 grams = tokens[idx_tok:end]
-                print(idx_tok)
-                print(end)
-                print(grams)
-                grams = " ".join(grams)
-#                print(grams)
-#                grams_doc = np.append(grams_doc, grams)
-                grams_doc.append(grams)
-#               n = idx_tok + n
-#            n_grams = np.append(n_grams, grams_doc)
-            n_grams.append(grams_doc)
-        return n_grams
 
+                # comparison needed to avoid last smaller grams
+                if len(grams) == n:
+                    print(grams)
+                    grams = " ".join(grams)
+
+                grams_doc.append(grams)
+            n_grams.append(grams_doc)
+
+        return n_grams
 
     def word_embedding(corpus):
         # Research Method with good performance, less power
