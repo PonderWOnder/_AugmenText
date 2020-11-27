@@ -2,7 +2,8 @@
 """
 Created on Tue Oct 13 09:37:08 2020
 
-@author: GROKA
+@author: 'Schmatz, Pasic, Braun, Avramidis'
+E-Mail: 'ds181019,ds182001,ds181026,ds181009@fhstp.ac.at'
 """
 import os
 from sys import stdout
@@ -10,6 +11,7 @@ import threading as th
 import multiprocessing as mp
 import time
 from hashlib import md5
+from random import randint
 from urllib.request import urlopen
 from bs4 import BeautifulSoup as urlreader 
 
@@ -25,6 +27,31 @@ class augmentext():
                  signs=[' ','.',',','-',':',')'],
                  list_of_supported_files=['.doc','.pdf','http:','https:','www.','.htm','.txt'],
                  supported_chr=[chr(i) for i in range(32,127)]+['ä','ü','ö','Ä','Ü','Ö']):
+        '''
+        
+
+        Parameters
+        ----------
+        path_to_text : TYPE, optional
+            DESCRIPTION. The default is None.
+        dictionary : TYPE, optional
+            DESCRIPTION. The default is None.
+        syn_loc : TYPE, optional
+            DESCRIPTION. The default is os.path.abspath('dictionary\Syn_Ant.txt').
+        dict_size : TYPE, optional
+            DESCRIPTION. The default is 10**6.
+        signs : TYPE, optional
+            DESCRIPTION. The default is [' ','.',',','-',':',')'].
+        list_of_supported_files : TYPE, optional
+            DESCRIPTION. The default is ['.doc','.pdf','http:','https:','www.','.htm','.txt'].
+        supported_chr : TYPE, optional
+            DESCRIPTION. The default is [chr(i) for i in range(32,127)]+['ä','ü','ö','Ä','Ü','Ö'].
+
+        Returns
+        -------
+        None.
+
+        '''
         self.somepath=path_to_text#should be list of URLs pointing to text of some sort
         self.syn_ant=syn_loc
         self.bib={}#will contain bibliography
@@ -39,7 +66,17 @@ class augmentext():
     
         
     def dir_file_or_url(self,location):
-        '''checks input type'''
+        '''Checks input type.
+       
+        Parameters
+        ----------
+        location : list of strings
+            DESCRIPTION. This is the list of resource identifiers or directories.
+            
+        Returns
+        -------
+        list of strings
+           DESCRIPTION. Returns only values that carry predefined strings'''
         if any(phrase in location for phrase in self.list_of_supported_files):      #very brittle going to be updated
             return [location]
         else:
@@ -55,34 +92,51 @@ class augmentext():
     
         
     def load_url_text(self,location): #URL
-        '''handels urls'''
         response=urlopen(location)
         return urlreader(response.read(),'lxml').text
-    
-    
-    def load_worddoc_text(self,location):
-        pass
-    
-    
-    def load_pdf_text(self,location):
-        pass
-    
+   
     
     def load_txt(self,location): #TXT
-        '''handels txt files'''
+        '''handels txt files.
+        
+        Parameters
+        ----------
+        location : string
+            DESCRIPTION. resource identifier pointing towards local file.
+        
+        Returns
+        -------
+        inter: string
+           DESCRIPTION. Returns string containing text in file'''
         txt=open(location,'rb')
         inter=txt.read().decode('utf8','ignore')
         txt.close()
         return inter 
     
+    
+    def __load_worddoc_text(self,location):
+        ''''''
+        pass
+    
+    
+    def __load_pdf_text(self,location):
+        ''''''
+        pass
+    
                    
-    def word_asstimator(self,string): 
+    def _word_asstimator(self,string): 
         '''handles Links in text by spliting them into words present 
         in the dictionary and droping everything else
+        
         Parameters
         ----------
-        string: str
+        string: string
+            DESCRIPTION. String containing special characters
         
+        Yields
+        ----------
+        output_list: list of strings
+            DESCRIPTION. splited Input string by its special characters an just returns words inside self.dictionary
         '''
         alpha_chr=[chr(i) for i in range(97,123)]#only lower letters
         clean_string=''
@@ -104,29 +158,67 @@ class augmentext():
         self.add_words(output_list,0)
     
     
-    def split_text(self,text,corpus=3): 
-        '''Simplest Tokenizer we could think of! Will be replaced with NLTK'''
+    def split_text(self,text,corpus=3):
+        '''Basic tokenizer. Will be replaced by nltk in th future
+        
+        Parameters
+        ----------
+        text: string
+            DESCRIPTION. whole document which is going to be tokenized
+        corpus: integer, optional(default=3,max=5)
+            DESCRIPTION. optional value that determins for how many seperation character should be accounted for
+        
+        Returns
+        ----------
+        list of list of strings
+            DESCRIPTION. Returns lists that were seperated by characters in sep (max length=5)'''
         sep=[' ','.','\n','\t','\r']
+        if corpus > 5:
+            corpus=3
         return [text.split(i) for i in sep[:corpus] if i in text]
     
     
     def drop_stuff(self,text): 
-        '''Checks text for non predefined ASCII values 
-        and replaces them with an empty string'''
+        '''Checks text for non predefined ASCII values and replaces them with an empty string.
+        
+        Parameters
+        ----------
+        text: string
+            DESCRIPTION. single word out of the tokenizer
+        
+        Returns
+        ----------
+        string
+            DESCRIPTION. cleaned from everything that is not in self.supported_chr'''
         supp_chr=self.supported_chr
         new_text=[i if i in supp_chr else ' ' for i in text]
         return ''.join(new_text)
     
     
     def work_through(self):
-        '''Applies tokenizer to extend bibliography 
-        entries by tokenized representations of text''' 
+        '''Applies tokenizer to extend self.bib(bibliography) entries by tokenized representations of text
+        
+        Yields
+        ----------
+        list of list of strings
+            DESCRIPTION. adds the return of self.split_text to self.bib''' 
         for key in self.bib.keys():
             self.bib[key]+=self.split_text(self.bib[key][0])
             print('text '+str(key)+' was seperated')        
     
     
     def add_to_bib(self, path_list):
+        '''adds entries to self.bib(bibliography). Depend of their type different interfaces are used.
+
+        Parameters
+        ----------
+        path_list : list
+            List of reource identifiers (self.somepath).
+
+        Yields
+        -------
+        list
+            Full text entries to self.bib(bibliography) as one string in list.'''
         for i in path_list:
             dic_hash=self.hash_it(i)
             
@@ -149,8 +241,13 @@ class augmentext():
     
         
     def inputtype_detect(self):
-        '''handles various different ways of supplying locations of text corpus
-        provided by URLs in self.somepath variable'''
+        '''handles various different ways of supplying locations of text corpus provided by URLs in self.somepath variable from the constructor.
+
+        Returns
+        -------
+        None.
+
+        '''
         if self.somepath is None:
             self.somepath=str(input('Enter dir file or URL: '))
             self.somepath=self.dir_file_or_url(self.somepath)
@@ -174,7 +271,19 @@ class augmentext():
     
         
     def word_it(self,word):
-        '''Standardizes strings for hashing'''
+        '''Standardizes strings for hashing. Drops . , on the and for example.
+
+        Parameters
+        ----------
+        word : string
+            DESCRIPTION. single toknized word to be standardized.
+
+        Returns
+        -------
+        string
+            DESCRIPTION. droped everything on the end of the word that is in self.signs.
+
+        '''
         if len(word)>1:    
             while True:
                 if word[-1] in self.signs: #not good for dosages
@@ -185,13 +294,38 @@ class augmentext():
     
     
     def hash_it(self,word):
-        '''hashes previously standardized word to numerical hash or length dict_size'''
+        '''standardizes and numerically hashes string that resembles a word, sentence or paragraph although word would be preferable.
+
+        Parameters
+        ----------
+        word : string
+            DESCRIPTION. unaltered string most likly from the tokenizer.
+
+        Returns
+        -------
+        integer
+            DESCRIPTION. numerical hash representation of to provided string
+
+        '''
         return int(md5(str.encode(self.word_it(word))).hexdigest(),16)%self.dict_size
     
     
     def is_it_in_yet(self,word):
-        '''Checks if word is already in dictionary and returns its position 
-        also considering hash collissions if word is already in dic'''
+        '''Checks if word is already in self.dictionary and returns its position also considering hash collissions if word is already in dic
+
+        Parameters
+        ----------
+        word : string
+            some unaltered word.
+
+        Returns
+        -------
+        boolian
+            True if word is in self.dictionary.
+        pos : integer
+            position within self.dictionary.
+
+        '''
         word=self.word_it(word)
         pos=self.hash_it(word)
         loc=self.dictionary[pos]
@@ -207,12 +341,30 @@ class augmentext():
                         break
             return in_yet, pos
         else:
-            return False, pos               
+            return False, pos  
+
+
+    def find_it(self,word):
+        _,pos=self.is_it_in_yet(word)
+        return pos             
             
         
     def add_words(self,liste,occurrence=1):
-        '''adds tokens to the dictionary either counting their appearence or not'''
-        self.seg_length=10000000
+        '''adds tokens to the dictionary either counting their appearence or not. For larger corpus (10**6) it switches in threaded mode
+
+        Parameters
+        ----------
+        liste : list
+            DESCRIPTION. words from self.bib.
+        occurrence : integer, optional
+            DESCRIPTION. The default is 1.
+
+        Yields
+        -------
+            DESCRIPTION. position string pairs to be added into self.dictionary at position
+
+        '''
+        self.seg_length=1000000
         if len(liste)>self.seg_length: 
             self.threaded([self.add_words,'addwords',liste])
         else:
@@ -283,7 +435,18 @@ class augmentext():
     
     
     def threaded(self,func):
-        '''Multi threading setup to handel processes in parallel'''
+        '''Multi threading setup to handel processes in parallel
+
+        Parameters
+        ----------
+        func : list
+            DESCRIPTION. Includes function, handler name for function and argument for function.
+
+        Returns
+        -------
+        None.
+
+        '''
         if len(func)>2:
             for i in range(2,len(func[2])):
                 if len(func[2])/i < self.seg_length:        
@@ -307,10 +470,18 @@ class augmentext():
                           
     
     def build_dict(self,path=os.path.abspath('dictionary/words.txt')): 
-        '''Just maps words from line seperated txt 
-        provided in parameter path to hash postions 
-        in list self.dictionary.
-        Does not do any hash collission detection!'''
+        '''Just maps words from line seperated txt provided in parameter path to hash postions in list self.dictionary. Does not do any hash collission detection!
+
+        Parameters
+        ----------
+        path : string, optional
+            DESCRIPTION. Locates the dictionary txt '~dictionary/words.txt').
+
+        Yields
+        -------
+            DESCRIPTION. Crued self.dict not checked for collisions.
+
+        '''
         words=open(path,'rb')
         txt=words.read().decode('utf8','ignore').split('\n')
         words.close()
@@ -340,10 +511,21 @@ class augmentext():
           
      
     def threaded_build(self,seg,seg2):
-        '''Detects collissions in segments of self.dictionary 
-        and maps them to empty positions within the segment.
-        should only be used if no other processes has altered 
-        self.dictionary'''
+        '''Detects collissions in segments of self.dictionary and maps them to empty positions within the segment. Should only be used if no other processes has altered self.dictionary
+        
+
+        Parameters
+        ----------
+        seg : integer
+            DESCRIPTION. Beginning
+        seg2 : integer
+            DESCRIPTION. End
+
+        Returns
+        -------
+        None.
+
+        '''
         x=0
         dude=self.dictionary[seg:seg2]
         stdout.write('segment '+str(seg)+' to '+str(seg2)+' has started with worker '+str(os.getpid())+'\n')
@@ -369,11 +551,22 @@ class augmentext():
         stdout.write('\rsegment '+str(seg)+' to '+str(seg2)+' has finished\n')
     
     
-    def syno_ant(self):
-        '''far to long function to transform synonym dictionary provided under
-        the location parameter into useable input to append self.dictionary with
-        synonym capabilities'''
-        syn_loc=self.syn_ant
+    def syno_ant(self,syn_loc=None):
+        '''far to long function to transform synonym dictionary provided under the location parameter into useable input to append self.dictionary with synonym capabilities.
+
+        Parameters
+        ----------
+        syn_loc : None, optional
+            DESCRIPTION. The default is None but is later changed to self.syn_ant which is location of synonym antonym dictionary. Function would work with any other.
+
+        Yields
+        -------
+        self.syn_list : list of strings
+            DESCRIPTION. List of entries in this specific synonym antonym dictionary 
+
+        '''
+        if syn_loc==None:
+            syn_loc=self.syn_ant
         txt=open(syn_loc,'rb')
         inter=txt.read().decode('utf8','ignore')
         txt.close()
@@ -477,27 +670,46 @@ class augmentext():
     
     
     def add_syns(self,seg1,seg2):
-        '''tailored to be passed into multi_proc modul for faster processing'''
+        '''adding synonyms from self.syn_list tailored to be passed into multi_proc modul for faster processing.
+
+        Parameters
+        ----------
+        seg1 : integer
+            DESCRIPTION. beginning 
+        seg2 : TYPE
+            DESCRIPTION. end
+
+        Yields
+        -------
+            DESCRIPTION. Adds Synonyms and Antonyms to self.dictionary.
+
+        '''
         inter_list=[]
         stdout.write('segment '+str(seg1)+' to '+str(seg2)+' has started with worker '+str(os.getpid())+'\n')
         working_on=self.syn_list[seg1:seg2]
         for stuff in working_on:
             stuff=''.join([i for i in stuff if i!=' '])
+            stuff=''.join([stuff[i] for i in range(len(stuff)) if stuff[i:i+2]!='..'])
             stuff=stuff.split('.')[:-1]
             stuffed=[]
-            for stuffing in stuff:
-                stuffing=stuffing.split(',')
-                stuffed.append(stuffing)
-            stuffed[0]=self.word_it(stuffed[0][0])
-            #stdout.write('\n'+stuffed[0])
-            inter_list.append(stuffed)
-            way_to_go=len(inter_list)
-            stdout.write('\r'+str(way_to_go)+' '+
-                         str(len(working_on))+
-                         (' False',' True ')[way_to_go==len(working_on)])
-        print('\n')
+            if len(stuff)>1:
+                for stuffing in stuff:
+                    stuffing=stuffing.split(',')
+                    stuffed.append(stuffing)
+                stuffed[0]=self.word_it(stuffed[0][0])
+                #stdout.write('\n'+stuffed[0])
+                inter_list.append(stuffed)
+                way_to_go=len(inter_list)
+                stdout.write('\r'+str(way_to_go)+' '+
+                             str(len(working_on))+
+                             (' False',' True ')[way_to_go==len(working_on)])
+            else:
+                stdout.write('\nNo Synonyms for '+stuff[0]+'\n')
+        stdout.write('\n')
         
         for prog,word in enumerate(inter_list):
+            if word[0]=='':
+                continue
             in_yet,where_to=self.is_it_in_yet(word[0])
             stdout.write((' False',' True')[in_yet]+
                          ' '+str(where_to)+
@@ -508,29 +720,76 @@ class augmentext():
             from_list=[]
             for tab in word[1:]:
                 self.add_words(tab,0)
-                from_list.append([self.hash_it(i) for i in tab])
+                syn_ant_list=[]
+                for syn_ant in tab:#this is stupid. there sure is a way to do it better
+                    tf,pos=self.is_it_in_yet(syn_ant)
+                    if tf==True:
+                        if pos!=178366:
+                            syn_ant_list.append(pos)
+                    else:
+                        self.add_words(syn_ant,0)
+                        tf,pos=self.is_it_in_yet(syn_ant)
+                        syn_ant_list.append(pos)  
+                from_list.append(syn_ant_list)
             to_list.append(from_list)
             self.lock.acquire()
             self.dictionary[where_to]=to_list
             if prog%int(way_to_go/100)==0:                           
                 self.count.value+=way_to_go/100
             self.lock.release()
-            stdout.write(str(where_to)+'\n ')
+            stdout.write(' '+str(where_to)+'\n ')
     
     
-        def find_syn(self,word):
-            where=self.hash_it(word)
-            info=self.dictionary[where]
-            if list in [type(i) for i in info]:
-                for num,i in enumerate(info):
-                    if type(i)==list:
-                        return i[0]
-            else:
-                stdout.write('No Synonyms found for '+word)
+    def find_syn(self,word,ant=False):
+        '''finds synonyms prefering first entries
+
+        Parameters
+        ----------
+        word : TYPE
+            DESCRIPTION.
+        ant : boolian, optional
+            DESCRIPTION. choose antonym if True. The default is False.
+
+        Returns
+        -------
+        string
+            DESCRIPTION.
+
+        '''
+        what_it_is=('Synonym','Antonym')
+        pos=self.find_it(word)
+        info=self.dictionary[pos]
+        if list in [type(i) for i in info]:
+            for num,i in enumerate(info):
+                if type(i)==list:
+                    if i[ant]==[]:
+                        stdout.write('No '+what_it_is[ant]+' found for '+word)
+                        return word
+                        break
+                    per=100
+                    pos_per=randint(1,per)
+                    base=len(i[ant])
+                    which_one=int(round((base**(1/per))**pos_per,0))-1
+                    return i[ant][which_one]
+                    break
+        else:
+            stdout.write('No '+what_it_is[ant]+' found for '+word)
+            return word
 
     
     def load_bar(self,length):
-        '''Just a for fun progressbar for initial hash collission detection'''
+        '''Just a for fun progressbar for initial hash collission detection
+
+        Parameters
+        ----------
+        length : integer
+            DESCRIPTION. To set the total amount of entries that will be changed
+
+        Returns
+        -------
+        None.
+
+        '''
         while self.count.value<length:           
             tot_prog=self.count.value
             if tot_prog%(length/1000) in [0,1,2,3,4,5,6,7,8,9]:
@@ -539,7 +798,19 @@ class augmentext():
 
             
     def multi_proc(self,things_todo):
-        '''Multi processing setup to handel processes in parallel on different CPU Cores'''
+        '''Multi processing setup to handel processes in parallel on different CPU Cores
+        
+
+        Parameters
+        ----------
+        things_todo : list of items
+            DESCRIPTION. function and args
+
+        Returns
+        -------
+        None.
+
+        '''
         self.count=mp.Manager().Value('i',0,lock=True)
         
         process_list=[]
@@ -557,8 +828,15 @@ class augmentext():
         stdout.write(str(len(process_list))+' processes took '+str(int(k/60))+'min '+str(int(k%60))+'sec\n\n')
     
     
-    def create_task_list(self):#shits all over the place 
-        '''Actual execution order for multiprocessed tasks'''
+    def create_task_list(self):
+        '''Actual execution order for multiprocessed tasks
+
+        Returns
+        -------
+        stuff_todo : list of lists
+            DESCRIPTION. Contains Includes function and argument for function.
+
+        '''
         stuff_todo=[]
         self.num_segs=mp.cpu_count()
         if self.num_segs>5:
@@ -591,7 +869,13 @@ class augmentext():
     
     
     def run(self):
-        '''builds stuff'''
+        '''Actual execution order for multiprocessed tasks
+
+        Returns
+        -------
+        None.
+
+        '''
         self.inputtype_detect()
         self.add_to_bib(self.somepath) 
         self.work_through()
