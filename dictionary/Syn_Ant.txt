@@ -26705,7 +26705,7 @@ KEY: Rill.
 SYN: Streamlet, brook, brooklet, creek, rivulet.
 ANT: River, large_stream.
 =
-KEY: Kind.
+KEY: Rind.
 SYN: Skin, peel, bark, husk.
 ANT: Kernel, meat, wood, pulp, fruit.
 =
