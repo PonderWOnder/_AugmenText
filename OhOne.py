@@ -10,6 +10,7 @@ from sys import stdout
 import threading as th
 import multiprocessing as mp
 import time
+from json import load, dump
 from hashlib import md5
 from random import randint
 from urllib.request import urlopen
@@ -349,7 +350,7 @@ class augmentext():
         return pos             
             
         
-    def add_words(self,liste,occurrence=1):
+    def add_words(self,liste,occurrence=0):
         '''adds tokens to the dictionary either counting their appearence or not. For larger corpus (10**6) it switches in threaded mode
 
         Parameters
@@ -364,7 +365,7 @@ class augmentext():
             DESCRIPTION. position string pairs to be added into self.dictionary at position
 
         '''
-        self.seg_length=1000000
+        self.seg_length=10000000
         if len(liste)>self.seg_length: 
             self.threaded([self.add_words,'addwords',liste])
         else:
@@ -383,7 +384,7 @@ class augmentext():
                     else:
                         if occurrence>0:
                             to_list.append(occurrence)
-                            self.vector_size+=occurrence
+                            self.vector_size+=1
                         
                     self.dictionary[target]=to_list
                     continue#stdout.write('\r'+i+' is already in dictionary at position '+str(target)+'\n')
@@ -745,20 +746,23 @@ class augmentext():
 
         Parameters
         ----------
-        word : TYPE
-            DESCRIPTION.
+        word : string/integer
+            DESCRIPTION. function chooses how to progress
         ant : boolian, optional
             DESCRIPTION. choose antonym if True. The default is False.
 
         Returns
         -------
-        string
-            DESCRIPTION.
+        string/integer
+            DESCRIPTION. what ever was the input
 
         '''
         what_it_is=('Synonym','Antonym')
-        pos=self.find_it(word)
-        info=self.dictionary[pos]
+        if type(word)==str:
+            pos=self.find_it(word)
+            info=self.dictionary[pos]
+        elif type(word)==int:
+            info=self.dictionary[word]
         if list in [type(i) for i in info]:
             for num,i in enumerate(info):
                 if type(i)==list:
@@ -777,7 +781,7 @@ class augmentext():
             return word
 
     
-    def load_bar(self,length):
+    def load_bar(self,length,increment):
         '''Just a for fun progressbar for initial hash collission detection
 
         Parameters
@@ -792,7 +796,7 @@ class augmentext():
         '''
         while self.count.value<length:           
             tot_prog=self.count.value
-            if tot_prog%(length/1000) in [0,1,2,3,4,5,6,7,8,9]:
+            if tot_prog%(length/increment) in [0,1,2,3,4,5,6,7,8,9]:
                 stdout.write('\rLoading'+' ['+'||'*int(tot_prog/(length/10))+']'+str(round(tot_prog/length*100,4))+'% ')
         stdout.write('\r100.0%\t'+str(tot_prog)+'\t\t\n')
 
@@ -865,11 +869,62 @@ class augmentext():
         #things_todo.append([self.load_bar,(len(self.syn_list),)])
         stuff_todo.append(things_todo)
         return stuff_todo
-        
     
+    
+    def _load_dict(self,location='ouput.new'):
+        '''
+        
+
+        Parameters
+        ----------
+        location : string, optional
+            DESCRIPTION. The default is 'ouput.new'.
+
+        Returns
+        -------
+        None.
+
+        '''
+        try:
+            location=os.path.abspath(location)
+            with open(location, "r") as fp:
+                self.dictionary=load(fp)
+        except:
+            print('Can\'t find .new file @ '+location,end=' ')
+            location=input('Please specify location: ')
+            self._load_dict(location)
+        
+
+
+    def _save_dict(self,location='ouput.new'):
+        '''
+        
+
+        Parameters
+        ----------
+        location : string, optional
+            DESCRIPTION. The default is 'ouput.new'.
+
+        Returns
+        -------
+        None.
+
+        '''
+        location=os.path.abspath(location)
+        if '.new' in location:     
+            with open(location, "w") as fp:
+                if type(self.dictionary)!=list:
+                    self.dictionary=list(self.dictionary)
+                dump(self.dictionary,fp)
+        else:
+            print("wrong format!",end=' ')
+            location=input('Please specify location: ')
+            self.__save_dict(location)
+
+            
     
     def run(self):
-        '''Actual execution order for multiprocessed tasks
+        '''Actual execution order for pipeline tasks
 
         Returns
         -------
