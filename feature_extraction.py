@@ -1,5 +1,4 @@
 import numpy as np
-from typing import Dict, List, Union
 import nltk
 import re
 
@@ -25,7 +24,7 @@ class Features:
         self.feature_matrix = self.generate()
         self.binary_feature_matrix = self.generate(binary=True)
 
-    def generate_tree_representation(self) -> Dict[str, Dict[int, int]]:
+    def generate_tree_representation(self):
         """
         This helper function returns a tree like representation of a given corpus
         by generating a nested dictionary.
@@ -143,7 +142,6 @@ class Features:
                  False: Text does not begin with capital letter
         """
         capital_letter = np.empty(shape=(0, 1))
-#        capital_letter = []
 
         for doc in self.corpus_list:
             if doc[0].isupper():
