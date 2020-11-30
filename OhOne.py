@@ -10,6 +10,7 @@ from sys import stdout
 import threading as th
 import multiprocessing as mp
 import time
+import nltk.tokenize as token
 from json import load, dump
 from hashlib import md5
 from random import randint
@@ -18,7 +19,9 @@ from bs4 import BeautifulSoup as urlreader
 
 
 
-class augmentext():
+
+
+class aug_loader:
     
     
     def __init__(self, path_to_text=None,
@@ -27,7 +30,8 @@ class augmentext():
                  dict_size=10**6,
                  signs=[' ','.',',','-',':',')'],
                  list_of_supported_files=['.doc','.pdf','http:','https:','www.','.htm','.txt'],
-                 supported_chr=[chr(i) for i in range(32,127)]+['ä','ü','ö','Ä','Ü','Ö']):
+                 supported_chr=[chr(i) for i in range(32,127)]+['ä','ü','ö',
+                                                                'Ä','Ü','Ö']):
         '''
         
 
@@ -64,7 +68,7 @@ class augmentext():
         self.count=0#just exists for loading bar function no greater us so far
         self.lock=mp.Lock()#function to coordinate dictioary writes in multiprocessing enviorment
         self.vector_size=0#depented on the amount of individual words used in text.  Since transformations are applied to text value most likely will be estimated by propabilities of transforamtion
-    
+        self.lower_letters=[chr(i) for i in range(97,123)]
         
     def dir_file_or_url(self,location):
         '''Checks input type.
@@ -139,10 +143,9 @@ class augmentext():
         output_list: list of strings
             DESCRIPTION. splited Input string by its special characters an just returns words inside self.dictionary
         '''
-        alpha_chr=[chr(i) for i in range(97,123)]#only lower letters
         clean_string=''
         for i in string:
-            if i in alpha_chr:
+            if i in self.lower_letters:
                 clean_string+=i
             else:
                 if clean_string!='':
@@ -159,6 +162,11 @@ class augmentext():
         self.add_words(output_list,0)
     
     
+    def nltk_split_text(self,text):
+        sep=[token.word_tokenize,token.sent_tokenize]
+        return [i(text) for i in sep]
+    
+    
     def split_text(self,text,corpus=3):
         '''Basic tokenizer. Will be replaced by nltk in th future
         
@@ -173,7 +181,7 @@ class augmentext():
         ----------
         list of list of strings
             DESCRIPTION. Returns lists that were seperated by characters in sep (max length=5)'''
-        sep=[' ','.','\n','\t','\r']
+        sep=['',' ','.','\n','\t','\r']
         if corpus > 5:
             corpus=3
         return [text.split(i) for i in sep[:corpus] if i in text]
@@ -204,12 +212,13 @@ class augmentext():
         list of list of strings
             DESCRIPTION. adds the return of self.split_text to self.bib''' 
         for key in self.bib.keys():
-            self.bib[key]+=self.split_text(self.bib[key][0])
+            self.bib[key]+=self.nltk_split_text(self.bib[key][0])
+            #self.bib[key]+=self.split_text(self.bib[key][0])
             print('text '+str(key)+' was seperated')        
     
     
-    def add_to_bib(self, path_list):
-        '''adds entries to self.bib(bibliography). Depend of their type different interfaces are used.
+    def add_to_bib(self):
+        '''adds entries to self.bib(bibliography). Depend on their type different interfaces are used.
 
         Parameters
         ----------
@@ -220,6 +229,8 @@ class augmentext():
         -------
         list
             Full text entries to self.bib(bibliography) as one string in list.'''
+        self.inputtype_detect()
+        path_list=self.somepath
         for i in path_list:
             dic_hash=self.hash_it(i)
             
@@ -239,6 +250,8 @@ class augmentext():
                     print('resource '+i+' is now available under '+str(dic_hash))
                 except:
                     print('couldn\'t find resource '+i)
+        self.work_through()
+        
     
         
     def inputtype_detect(self):
@@ -370,8 +383,13 @@ class augmentext():
             self.threaded([self.add_words,'addwords',liste])
         else:
             for i in liste:
-                
                 i=self.word_it(i)
+                if i=='':#this is a hack to avoid empty strings
+                    continue
+                if ord(max(i))>122 or ord(min(i))<97:
+                    self._word_asstimator(i)
+                    if len([let for let in i if let not in self.lower_letters])>1 or len(i)>45:#45 is the longest english word according to wikipedia or more special characters
+                        continue
                 in_yet, target=self.is_it_in_yet(i)
                 if in_yet==True:
                     to_list=self.dictionary[target]
@@ -852,7 +870,7 @@ class augmentext():
         segs=[x*int(self.dict_size/self.num_segs) for x in range(self.num_segs+1)]
         segs[-1]=self.dict_size
         things_todo=[[self.threaded_build,(segs[i],segs[i+1])] for i in range(self.num_segs)]
-        things_todo.append([self.load_bar,(self.dict_size,)])
+        #things_todo.append([self.load_bar,(self.dict_size,)])
         stuff_todo.append(things_todo)
         
         things_todo=[]
@@ -931,20 +949,36 @@ class augmentext():
         None.
 
         '''
-        self.inputtype_detect()
-        self.add_to_bib(self.somepath) 
-        self.work_through()
-        self.build_dict()
-        self.syno_ant()
-        stuff_todo=self.create_task_list()
-        for things_todo in stuff_todo:
-            self.multi_proc(things_todo)
-        input(':')
+        #self.inputtype_detect()
+        self.add_to_bib() 
+        self._load_dict()
+        # self.work_through()
+        # self.build_dict()
+        # self.syno_ant()
+        # stuff_todo=self.create_task_list()
+        # for things_todo in stuff_todo:
+        #     self.multi_proc(things_todo)
+        # input(':')
 
         
+class aug_input:
+    
+    def __init__(self, files):
+        inst=aug_loader(files)
+        inst.run()
+        self.bib=inst.bib
+        self.dictionary=inst.dictionary
 
 
-        
+class tree(aug_loader):
+    
+    
+    def __init__(self, node_size=3):
+        self.node_size=node_size
+
+
+    def add(self):
+        pass
         
 
         
