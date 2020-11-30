@@ -26,8 +26,8 @@ class Features:
 
     def generate_tree_representation(self):
         """
-        This helper function returns a tree like representation of a given corpus
-        by generating a nested dictionary.
+        This helper function returns a tree like representation of a given
+        corpus by generating a nested dictionary.
 
         :return: Nested dictionary, with the token as first key,
                 the document as 2nd key
@@ -115,7 +115,8 @@ class Features:
         Multi-digit numbers and floats are not separated.
 
         :return: List with Lists per document, which contain the
-                 specific document id and another list with the occurring numbers.
+                 specific document id and another list with
+                 the occurring numbers.
         """
 
         doc_numbers = np.empty(shape=(0, 1))
@@ -266,7 +267,8 @@ class Features:
 
             \\text{TF} = \\frac{t_N}{n}
 
-        TF = (Number of times term T appears in the particular row) / (number of terms in that row)
+        TF = (Number of times term T appears in the particular row) /
+             (number of terms in that row)
 
 
         :return: Nested np.array with the tf per token and document
@@ -291,8 +293,8 @@ class Features:
 
             \\text{IDF} = log\\Big(\\frac{N}{n}\\Big)
 
-        Where :math:`N` is the number of rows and :math:`n` is the number of rows
-        where the word is present.
+        Where :math:`N` is the number of rows and :math:`n` is the number of
+        rows where the word is present.
 
         :param smooth: True, if the smoothing shall be added to the formula.
         :type smooth:  Boolean
@@ -313,8 +315,8 @@ class Features:
 
     def term_frequency_inverse_document_frequency(self, smooth=True):
         """
-        The Term Frequency-Inverse Document Frequency (TF-IDF) is the TF times the
-        IDF:
+        The Term Frequency-Inverse Document Frequency (TF-IDF) is the TF times
+        the IDF:
 
         .. math::
 
@@ -372,52 +374,4 @@ class Features:
             n_grams.append(grams_doc)
 
         return n_grams
-
-
-if __name__ == '__main__':
-    corpus1 = [
-        'This is the 4first document.',
-        'This document is the second document.',
-        'and t2his is the th6ird one.',
-        'Is this the first document?',
-    ]
-
-    corpus2 = {"dok1": [["This ? is the 42first document."], [""], [""], [""]],
-               "dok2": [["This document is 1.9 the second document."], [""], [""], [""]],
-               "dok3": [["and t2his is the th6ird one."], [""], [""], [""]],
-               "dok4": [["Is this the first document?"], [""], [""], [""]]}
-
-    import os
-    directory = r'C:\Users\Jacky\PycharmProjects\_AugmenText\test'
-    corpus3 = {}
-    for file in os.listdir(directory):
-        file_path = os.path.join(directory, file)
-        text = open(file_path, "r").read()
-        filename = os.path.splitext(file)[0]
-        corpus3[filename] = [[text], [""], [""], [""]]
-#        print(filename)
-#        print(text)
-    corp = Features(corpus3)
-
-    print(corp.corpus_list)
-#    print(corp.word_tree)
-#    print(f'Tokens: {corp.tokens}')
-#    print(corp.feature_matrix)
-#    print(corp.binary_feature_matrix)
-    print(f'Average word length: {corp.average_word_length}')
-    print(f'Numbers in corpus: {corp.text_contains_numbers}')
-    print(f'Capital Letters: {corp.text_begins_with_capital_letter}')
-    print(f'Number of Words: {corp.number_of_words}')
-    print(f'Number of Characters: {corp.number_of_characters()}')
-    print(f'Number of Characters without whitespaces: {corp.number_of_characters(incl_whitespace=False)}')
-    print(f'Number of special Characters: {corp.number_of_special_characters}')
-    print(f'Number of numerical Characters: {corp.number_of_numerical_items}')
-    print(f'Corpus List: {corp.corpus_list}')
-    print(f'TF: {corp.term_frequency}')
-    print(f'IDF: {corp.inverse_document_frequency(smooth=True)}')
-    print(f'TF-IDF: {corp.term_frequency_inverse_document_frequency(smooth=True)}')
-    print(f'N-grams: {corp.n_grams(n=3)}')
-    print(f'Stopwords: {corp.number_of_stopwords()}')
-    print(len(corp.corpus_list))
-    print(corp.corpus.items())
 
