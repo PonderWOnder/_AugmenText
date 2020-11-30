@@ -12,14 +12,18 @@
 #
 import os
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.abspath('.')))
+
 
 
 # -- Project information -----------------------------------------------------
 
+
 project = '_Augmentext'
 copyright = '2020, Schmatz, Pasic, Braun, Avramidis'
 author = 'Schmatz, Pasic, Braun, Avramidis'
+
 
 # The full version, including alpha/beta/rc tags
 release = '0.1'
@@ -30,8 +34,10 @@ release = '0.1'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+
 extensions = [
 ]
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
