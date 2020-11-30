@@ -4,20 +4,26 @@ import nltk
 import re
 
 
-class GenerateSparseMatrix:
+class Features:
+    """
+    The class :class:`Operation` represents the base class for all
+    feature extractions.
+    """
     def __init__(self, corpus):
         self.corpus = corpus
         self.corpus_list = []
         self.tokens = []
         self.documents = self.corpus.keys()
 
-        self.sparse_tree = None
-        self.sparse_matrix = None
+        self.word_tree = None
+        self.feature_matrix = None
+        self.binary_feature_vectors = None
 
         self.initialize()
 
     def initialize(self):
-        self.sparse_matrix = self.generate()
+        self.feature_matrix = self.generate()
+        self.binary_feature_vectors = self.generate(binary=True)
 
     def generate_tree_representation(self) -> Dict[str, Dict[int, int]]:
         """
@@ -26,7 +32,7 @@ class GenerateSparseMatrix:
 
         Returns
         -------
-        token_dict: Nested dictionary, with the token as first key,
+        :return: Nested dictionary, with the token as first key,
                 the document as 2nd key
                 and the token count as value of the 2nd key.
 
@@ -54,34 +60,39 @@ class GenerateSparseMatrix:
 
         return token_dict
 
-    def generate(self) -> np.ndarray:
+    def generate(self, binary: bool = False) -> np.ndarray:
         """
-        This function creates a sparse matrix, which contains the numbers of
+        This function creates a 2D matrix, which contains the numbers of
         every token. The x-axis represents the token, the y-axis represents
         the document ID so the value shows the frequency of a specific token in
         a document.
 
         Returns
         ------
-        sparse_matrix: Sparse matrix of the Corpus object.
+        feature_matrix: 2D matrix of the Corpus object.
         """
 
-        # Create sparse tree
-        self.sparse_tree = self.generate_tree_representation()
+        # Create word tree
+        self.word_tree = self.generate_tree_representation()
 
         # get token
-        self.tokens = list(self.sparse_tree.keys())
+        self.tokens = list(self.word_tree.keys())
 
         # Create empty sparse matrix
-        sparse_matrix = np.zeros((len(self.corpus), len(self.sparse_tree.keys())))
+        feature_matrix = np.zeros((len(self.corpus), len(self.word_tree.keys())))
 
-        for index, (tok, doc) in enumerate(self.sparse_tree.items()):
+        for index, (tok, doc) in enumerate(self.word_tree.items()):
             for doc2, val in doc.items():
 
                 # Fill sparse matrix
-                sparse_matrix[doc2, index] = val
+                if binary:
+                    if val > 0:
+                        val = 1
+                    feature_matrix[doc2, index] = val
+                else:
+                    feature_matrix[doc2, index] = val
 
-        return sparse_matrix
+        return feature_matrix
 
     @ property
     def average_word_length(self) -> np.ndarray:
@@ -273,12 +284,11 @@ class GenerateSparseMatrix:
         tf = list(map(
             lambda doc_list: list(map(
                 lambda val: round(
-                    val/len(doc_list), 3), doc_list)), self.sparse_matrix))
+                    val/len(doc_list), 3), doc_list)), self.feature_matrix))
 
         return np.asarray(tf)
 
-    @ property
-    def inverse_document_frequency(self) -> np.array:
+    def inverse_document_frequency(self, smooth: bool = True) -> np.array:
         """
         The inverse document frequency, IDF, of a word is the log of the ratio
         of the total number of rows to the number of rows in which that word is
@@ -293,7 +303,7 @@ class GenerateSparseMatrix:
         Where :math:`N` is the number of rows and :math:`n` is the number of rows
         where the word is present.
 
-        :param corpus: The corpus to analyse.
+        :param smooth: True, if the smoothing shall be added to the formula.
 
         Returns
         -------
@@ -301,14 +311,19 @@ class GenerateSparseMatrix:
         """
 
         n = len(self.documents)
-        tr_sparse_mat = np.transpose(self.sparse_matrix)
+        tr_mat = np.transpose(self.feature_matrix)
+
+        # Smoothing added here
+        if smooth:
+            n += 1
+
         idf = list(map(lambda x: round(
-            np.log(n/np.count_nonzero(x, axis=0)), 3), tr_sparse_mat))
+            np.log(n/np.count_nonzero(x, axis=0)) + 1, 3), tr_mat))
 
         return np.asarray(idf)
 
-    @ property
-    def term_frequency_inverse_document_frequency(self) -> np.array:
+    def term_frequency_inverse_document_frequency(self, smooth: bool = True) \
+            -> np.array:
         """
         The Term Frequency-Inverse Document Frequency (TF-IDF) is the TF times the
         IDF:
@@ -321,9 +336,12 @@ class GenerateSparseMatrix:
         -------
         tf_idf:
         """
-
         tf_list = self.term_frequency
-        idf_list = self.inverse_document_frequency
+
+        if not smooth:
+            idf_list = self.inverse_document_frequency(smooth=False)
+        else:
+            idf_list = self.inverse_document_frequency(smooth=True)
 
         tf_idf = list(map(
             lambda tf_doc: list(map(
@@ -359,15 +377,16 @@ class GenerateSparseMatrix:
                 end = idx_tok + n
                 grams = tokens[idx_tok:end]
 
-                # comparison needed to avoid last smaller grams
+                # comparison needed to avoid last smaller grams of the end
                 if len(grams) == n:
-                    print(grams)
                     grams = " ".join(grams)
 
                 grams_doc.append(grams)
             n_grams.append(grams_doc)
 
         return n_grams
+
+
 
     def word_embedding(corpus):
         # Research Method with good performance, less power
@@ -395,12 +414,14 @@ if __name__ == '__main__':
         text = open(file_path, "r").read()
         filename = os.path.splitext(file)[0]
         corpus3[filename] = [[text], [""], [""], [""]]
-        print(filename)
-        print(text)
-    corp = GenerateSparseMatrix(corpus3)
+#        print(filename)
+#        print(text)
+    corp = Features(corpus3)
 
+    print(corp.word_tree)
     print(f'Tokens: {corp.tokens}')
-    print(corp.sparse_matrix)
+    print(corp.feature_matrix)
+    print(corp.binary_feature_vectors)
     print(f'Average word length: {corp.average_word_length}')
     print(f'Numbers in corpus: {corp.text_contains_numbers}')
     print(f'Capital Letters: {corp.text_begins_with_capital_letter}')
@@ -411,8 +432,8 @@ if __name__ == '__main__':
     print(f'Number of numerical Characters: {corp.number_of_numerical_items}')
     print(f'Corpus List: {corp.corpus_list}')
     print(f'TF: {corp.term_frequency}')
-    print(f'IDF: {corp.inverse_document_frequency}')
-    print(f'TF-IDF: {corp.term_frequency_inverse_document_frequency}')
+    print(f'IDF: {corp.inverse_document_frequency(smooth=True)}')
+    print(f'TF-IDF: {corp.term_frequency_inverse_document_frequency(smooth=True)}')
     print(f'N-grams: {corp.n_grams(n=3)}')
 
 
