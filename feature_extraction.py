@@ -6,7 +6,7 @@ import re
 
 class Features:
     """
-    The class :class:`Operation` represents the base class for all
+    The class :class:`Features` represents the base class for all
     feature extractions.
     """
     def __init__(self, corpus):
@@ -17,21 +17,19 @@ class Features:
 
         self.word_tree = None
         self.feature_matrix = None
-        self.binary_feature_vectors = None
+        self.binary_feature_matrix = None
 
         self.initialize()
 
     def initialize(self):
         self.feature_matrix = self.generate()
-        self.binary_feature_vectors = self.generate(binary=True)
+        self.binary_feature_matrix = self.generate(binary=True)
 
     def generate_tree_representation(self) -> Dict[str, Dict[int, int]]:
         """
         This helper function returns a tree like representation of a given corpus
         by generating a nested dictionary.
 
-        Returns
-        -------
         :return: Nested dictionary, with the token as first key,
                 the document as 2nd key
                 and the token count as value of the 2nd key.
@@ -43,6 +41,9 @@ class Features:
         """
 
         token_dict = {}
+
+        # Necessary to avoid multiple appends with multiple function calls
+        self.corpus_list = []
 
         for idx_doc, (doc, val_list) in enumerate(self.corpus.items()):
             doc_text = val_list[0][0]
@@ -60,16 +61,14 @@ class Features:
 
         return token_dict
 
-    def generate(self, binary: bool = False) -> np.ndarray:
+    def generate(self, binary=False):
         """
-        This function creates a 2D matrix, which contains the numbers of
-        every token. The x-axis represents the token, the y-axis represents
+        This function creates a matrix (np.array), which contains the numbers
+        of every token. The x-axis represents the token, the y-axis represents
         the document ID so the value shows the frequency of a specific token in
         a document.
 
-        Returns
-        ------
-        feature_matrix: 2D matrix of the Corpus object.
+        :return: matrix as np.array of the Corpus object.
         """
 
         # Create word tree
@@ -95,13 +94,11 @@ class Features:
         return feature_matrix
 
     @ property
-    def average_word_length(self) -> np.ndarray:
+    def average_word_length(self):
         """
         Calculates the average word length per document.
 
-        Returns
-        -------
-        average_word_length: Number of the average word length
+        :return: Number of the average word length
         """
 
         token_list = map(lambda x: nltk.word_tokenize(x), self.corpus_list)
@@ -112,17 +109,16 @@ class Features:
         return np.asarray(average_word_length)
 
     @ property
-    def text_contains_numbers(self) -> np.array(List[float]):
+    def text_contains_numbers(self):
         """
         Finds ALL numbers per document, regardless of whether they
         stand alone or appear in a string.
         Multi-digit numbers and floats are not separated.
 
-        Returns
-        -------
-        doc_numbers: List with Lists per document, which contain the
-        specific document id and another list with the occuring numbers.
+        :return: List with Lists per document, which contain the
+                 specific document id and another list with the occurring numbers.
         """
+
         doc_numbers = np.empty(shape=(0, 1))
 
         for txt in self.corpus_list:
@@ -137,17 +133,14 @@ class Features:
         return doc_numbers
 
     @ property
-    def text_begins_with_capital_letter(self) -> np.array:
+    def text_begins_with_capital_letter(self):
         """
         Checks, if a document starts with a capital letter and
         stores the boolean result.
 
-        Returns
-        -------
-        capital_letter:
-                    Boolean value:
-                    True: Text begins with capital letter
-                    False: Text does not begin with capital letter
+        :return: np.array with boolean values:
+                 True: Text begins with capital letter
+                 False: Text does not begin with capital letter
         """
         capital_letter = np.empty(shape=(0, 1))
 #        capital_letter = []
@@ -161,14 +154,12 @@ class Features:
         return capital_letter
 
     @ property
-    def number_of_words(self) -> np.array:
+    def number_of_words(self):
         """
         Calculates the number of words per document, therefore the text
         is split in token, any token without any letters is excluded.
 
-        Returns
-        -------
-        token_count: Number of tokens per document
+        :return: np.array with number of tokens per document
         """
 
         token_list = list(map(
@@ -182,19 +173,17 @@ class Features:
 
         return np.asarray(token_count)
 
-    def number_of_characters(self, incl_whitespace: bool = True) -> np.array:
+    def number_of_characters(self, incl_whitespace=True) -> np.array:
     # TODO: Define character
         """
         All characters per document are counted, either with or without
         whitespaces.
 
-        Parameters
-        ----------
-        incl_whitespace: If True, whitespaces are also
-                    counted as characters
-        Returns
-        -------
-        char_count:      Number of characters per document
+
+        :param incl_whitespace: If True, whitespaces are also counted as
+                                characters
+        :type incl_whitespace:  Boolean
+        :return: np.array with the number of characters per document
         """
 
         # Count characters
@@ -207,17 +196,25 @@ class Features:
         return np.asarray(char_count)
 
     def number_of_stopwords(self):
-        # TODO: stopwords define by nltk, tf-idf or both?
-        return 0
+
+        stopwords_list = []
+        stop_words = set(nltk.corpus.stopwords.words('english'))
+        count_stopwords = 0
+        for idx, (doc_name, txt) in enumerate(self.corpus.items()):
+            tokens = txt[1]
+            for token in tokens:
+                if token in stop_words:
+                    count_stopwords += 1
+            stopwords_list.append(count_stopwords)
+
+        return stopwords_list
 
     @ property
-    def number_of_special_characters(self) -> np.array:
+    def number_of_special_characters(self):
         """
         Counts all special characters per document, excluding whitespaces.
 
-        Returns
-        -------
-        spec_char_count: Number of special characters per document
+        :return: np.array with the number of special characters per document
         """
 
         # Remove non-special characters
@@ -242,9 +239,7 @@ class Features:
             "t2his":    1
             "42first":  2
 
-        Returns
-        -------
-        num_count: Number of numerical items per document.
+        :return: np.array with the number of numerical items per document.
         """
 
         # Remove non special characters
@@ -261,7 +256,7 @@ class Features:
         return np.asarray(num_count)
 
     @ property
-    def term_frequency(self) -> np.array:
+    def term_frequency(self):
         # TODO: Sentence?
         """
         Term frequency is simply the ratio of the count of a word present in a
@@ -276,9 +271,7 @@ class Features:
         TF = (Number of times term T appears in the particular row) / (number of terms in that row)
 
 
-        Returns
-        -------
-        tf:
+        :return: Nested np.array with the tf per token and document
         """
 
         tf = list(map(
@@ -288,7 +281,7 @@ class Features:
 
         return np.asarray(tf)
 
-    def inverse_document_frequency(self, smooth: bool = True) -> np.array:
+    def inverse_document_frequency(self, smooth=True):
         """
         The inverse document frequency, IDF, of a word is the log of the ratio
         of the total number of rows to the number of rows in which that word is
@@ -304,10 +297,8 @@ class Features:
         where the word is present.
 
         :param smooth: True, if the smoothing shall be added to the formula.
-
-        Returns
-        -------
-        idf: The inverse document frequency.
+        :type smooth:  Boolean
+        :return:       np.array with the inverse document frequency per token.
         """
 
         n = len(self.documents)
@@ -322,8 +313,7 @@ class Features:
 
         return np.asarray(idf)
 
-    def term_frequency_inverse_document_frequency(self, smooth: bool = True) \
-            -> np.array:
+    def term_frequency_inverse_document_frequency(self, smooth=True):
         """
         The Term Frequency-Inverse Document Frequency (TF-IDF) is the TF times the
         IDF:
@@ -332,9 +322,10 @@ class Features:
 
             \\text{TF-IDF} = \\text{TF(t,d)} \\times \\text{IDF}(t)
 
-        Returns
-        -------
-        tf_idf:
+        :param smooth: True, if the smoothing shall be added to the formula.
+        :type smooth:  Boolean
+        :return: Nested np.array with the calculated tf-idf per token and
+                 document
         """
         tf_list = self.term_frequency
 
@@ -349,7 +340,7 @@ class Features:
 
         return np.asarray(tf_idf)
 
-    def n_grams(self, n: int = 2) -> List[List[str]]:
+    def n_grams(self, n=2):
         """
         Uses the tokens of the documents to create N-token sequences
         of words.
@@ -358,13 +349,11 @@ class Features:
             Text:   According to a recent  American study food allergies ...
             Sequences: "According to", "to a", "a recent", "recent American",..
 
-        Parameters
-        ----------
-        n: Length of the sequences
 
-        Returns
-        -------
-        List with lists per document, containing the sequences
+        :param n: Length of the sequences/number of characters
+        :type n:  Integer
+
+        :return: List with lists per document, containing the sequences
         """
 
         n_grams = []
@@ -385,12 +374,6 @@ class Features:
             n_grams.append(grams_doc)
 
         return n_grams
-
-
-
-    def word_embedding(corpus):
-        # Research Method with good performance, less power
-        return 0
 
 
 if __name__ == '__main__':
@@ -418,10 +401,11 @@ if __name__ == '__main__':
 #        print(text)
     corp = Features(corpus3)
 
-    print(corp.word_tree)
-    print(f'Tokens: {corp.tokens}')
-    print(corp.feature_matrix)
-    print(corp.binary_feature_vectors)
+    print(corp.corpus_list)
+#    print(corp.word_tree)
+#    print(f'Tokens: {corp.tokens}')
+#    print(corp.feature_matrix)
+#    print(corp.binary_feature_matrix)
     print(f'Average word length: {corp.average_word_length}')
     print(f'Numbers in corpus: {corp.text_contains_numbers}')
     print(f'Capital Letters: {corp.text_begins_with_capital_letter}')
@@ -435,5 +419,7 @@ if __name__ == '__main__':
     print(f'IDF: {corp.inverse_document_frequency(smooth=True)}')
     print(f'TF-IDF: {corp.term_frequency_inverse_document_frequency(smooth=True)}')
     print(f'N-grams: {corp.n_grams(n=3)}')
-
+    print(f'Stopwords: {corp.number_of_stopwords()}')
+    print(len(corp.corpus_list))
+    print(corp.corpus.items())
 
