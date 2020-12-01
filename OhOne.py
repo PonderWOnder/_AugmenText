@@ -985,6 +985,7 @@ class aug_input(aug_loader):
     
     def __init__(self, files=None):
         aug_loader.__init__(self,path_to_text=files)
+        self.run()
     
 
         

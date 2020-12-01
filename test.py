@@ -7,6 +7,6 @@ if __name__ == "__main__":
     liste=[os.path.abspath(''),
            'https://medium.com/@justinboylantoomey/fast-text-extraction-with-python-and-tika-41ac34b0fe61',
            'https://en.wikipedia.org/wiki/Tokenization_(lexical_analysis)']
-    sometest=aug_input(liste)._run_2()
+    sometest=aug_input(liste)
 
 
