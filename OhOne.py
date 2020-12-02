@@ -959,29 +959,40 @@ class aug_loader:
         # for things_todo in stuff_todo:
         #     self.multi_proc(things_todo)
         # input(':')
-
-        
-class aug_input:
-    
-    def __init__(self, files):
-        inst=aug_loader(files)
-        inst.run()
-        self.bib=inst.bib
-        self.dictionary=inst.dictionary
-
-
-class tree(aug_loader):
+        return self
     
     
-    def __init__(self, node_size=3):
-        self.node_size=node_size
+    def _run_2(self):
+        '''Actual execution order for pipeline tasks
 
+        Returns
+        -------
+        None.
 
-    def add(self):
-        pass
+        '''
+        self.add_to_bib() 
+        self._load_dict()
+        self.build_dict()
+        self.syno_ant()
+        stuff_todo=self.create_task_list()
+        for things_todo in stuff_todo:
+            self.multi_proc(things_todo)
+        input(':')
+        return self
+
+        
+class aug_input(aug_loader):
+    
+    def __init__(self, files=None):
+        aug_loader.__init__(self,path_to_text=files)
+        self.run()
+    
+
         
 
-        
-        
+class input_aug(aug_loader):
+    pass     
+
+
 
         

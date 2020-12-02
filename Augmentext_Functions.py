@@ -15,7 +15,7 @@ from typing import Dict, List, Union
 class spell_mistake():
     
     def __init__(self, token_list):
-        self.token_text = token_text
+        self.token_list = token_list
 
         self.neighbours = {
             'q': ['a', 'w'],
@@ -48,7 +48,7 @@ class spell_mistake():
             }
 
 
-            self.keyboard_positions_lower = {
+        self.keyboard_positions_lower = {
             '`' : (-1,0),
             '1' : (0, 0),
             '2' : (1, 0),
@@ -58,7 +58,7 @@ class spell_mistake():
             '6' : (5, 0),
             '7' : (6, 0),
             '8' : (7, 0),
-            '9' : (7, 0),
+            '9' : (8, 0),
             '0' : (9, 0),
             '-' : (10,0),
             '=' : (11,0),
@@ -104,7 +104,7 @@ class spell_mistake():
             ' ' : (5, 4)
             }
             
-            self.keyboard_positions_upper = {
+        self.keyboard_positions_upper = {
             '~' : (-1,0),
             '!' : (0, 0),
             '@' : (1, 0),
@@ -114,7 +114,7 @@ class spell_mistake():
             '^' : (5, 0),
             '&' : (6, 0),
             '*' : (7, 0),
-            '(' : (7, 0),
+            '(' : (8, 0),
             ')' : (9, 0),
             '_' : (10,0),
             '+' : (11,0),
@@ -159,7 +159,7 @@ class spell_mistake():
             ' ' : (5, 4)
             }
 
-    self.all_chars = [x for x in self.keyboard_positions_upper] + [x for x in self.keyboard_positions_lower]
+        self.all_chars = [x for x in self.keyboard_positions_upper] + [x for x in self.keyboard_positions_lower]
 
     def random_spell_mistake(self, p=0.01):   
         """
@@ -226,7 +226,7 @@ class spell_mistake():
                         letter = neighbour_letters[random.randint(0,len(neighbour_letters)-1)]
                 word_list.append(letter)
                 new_word = ''.join(word_list)
-           self.final_list.append(new_word)
+            self.final_list.append(new_word)
         return self.final_list
     
     
@@ -257,7 +257,7 @@ class spell_mistake():
                 word_list.append(letter)
                 new_word = ''.join(word_list)
             self.final_list.append(new_word)
-        return final_list
+        return self.final_list
     
     
     
@@ -319,7 +319,7 @@ class spell_mistake():
         return self.final_list
     
     
-    def double_letter(self.token_list, p=0.01):
+    def double_letter(self, p=0.01):
         """
         Doubles characters with a certain probability.
         
@@ -348,7 +348,7 @@ class spell_mistake():
         return self.final_list
     
         
-    def calculate_distance(x1,y1,x2,y2):
+    def calculate_distance(self, x1,y1,x2,y2):
         """
         Calculates the euclidean distance between two points in a two-dimensional space.
     
@@ -374,7 +374,7 @@ class spell_mistake():
         return (xdist**2 + ydist**2)**0.5
     
     
-    def calculating_probs(key):
+    def calculating_probs(self, key):
         """
         Calculates probabilities for all misspelling options of a letter. The closer
         the keys are to each other, the higher the probability will be.
@@ -401,7 +401,7 @@ class spell_mistake():
         for letter in keyboard_positions: 
             if letter != key:
                 posx1, posy1 = keyboard_positions[letter]
-                dist = calculate_distance(posx, posy, posx1, posy1)
+                dist = self.calculate_distance(posx, posy, posx1, posy1)
                 inverse_dist = 1/(dist**6)
                 inverse_dists[letter] = inverse_dist
                 sum_inverse_dists += inverse_dist
@@ -410,7 +410,7 @@ class spell_mistake():
             probs[key] = value/sum_inverse_dists
         return probs
     
-    def pick_random_letter(prob_dist):
+    def pick_random_letter(self, prob_dist):
         """
         Picks a random letter according to the probability distribution from
         calculating_probs.
@@ -459,8 +459,8 @@ class spell_mistake():
             word_list = []
             for letter in token: 
                 if random.uniform(0,1) < p:
-                    neighbour_probs = calculating_probs(letter)
-                    letter = pick_random_letter(neighbour_probs)
+                    neighbour_probs = self.calculating_probs(letter)
+                    letter = self.pick_random_letter(neighbour_probs)
                 word_list.append(letter)
                 new_word = ''.join(word_list)
             self.final_list.append(new_word)
