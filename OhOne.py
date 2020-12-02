@@ -966,14 +966,15 @@ class aug_loader:
         #     self.multi_proc(things_todo)
         # input(':')
         return self
-    
-    
+
+      
     def _run_2(self):
         '''Actual execution order for pipeline tasks
 
         Returns
         -------
         None.
+
 
         '''
         self.add_to_bib() 
@@ -993,14 +994,10 @@ class aug_input(aug_loader,spell_mistake):
     
     def __init__(self, files=None):
         aug_loader.__init__(self,path_to_text=files)
-        spell_mistake.__init__=(self,[self.bib[key][1] for key in self.bib])
         self.run()
-    
-
+        spell_mistake.__init__=(self,[self.bib[key][1] for key in self.bib])
         
 
-class input_aug(aug_loader):
-    pass     
 
 
 
