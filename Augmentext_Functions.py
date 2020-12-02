@@ -192,7 +192,8 @@ class spell_mistake:
                 word_list.append(letter)
                 new_word = ''.join(word_list)
             self.final_list.append(new_word)
-        return self.final_list
+        self.token_list=self.final_list
+        return self
     
     
     def realistic_spell_mistake(self, p = 0.01):
@@ -228,7 +229,8 @@ class spell_mistake:
                 word_list.append(letter)
                 new_word = ''.join(word_list)
             self.final_list.append(new_word)
-        return self.final_list
+        self.token_list=self.final_list
+        return self
     
     
     
@@ -258,7 +260,8 @@ class spell_mistake:
                 word_list.append(letter)
                 new_word = ''.join(word_list)
             self.final_list.append(new_word)
-        return self.final_list
+        self.token_list=self.final_list
+        return self
     
     
     
@@ -288,7 +291,8 @@ class spell_mistake:
                     word_list[idx], word_list[idx-1] = word_list[idx-1], word_list[idx]
             new_word = ''.join(word_list)
             self.final_list.append(new_word)
-        return self.final_list
+        self.token_list=self.final_list
+        return self
     
     
     def space_inserter (self, p=0.01):
@@ -317,7 +321,8 @@ class spell_mistake:
                 word_list.append(letter)
                 string_word = ''.join(word_list)
             self.final_list.append(string_word)
-        return self.final_list
+        self.token_list=self.final_list
+        return self
     
     
     def double_letter(self, p=0.01):
@@ -346,7 +351,8 @@ class spell_mistake:
                 word_list.append(letter)
             new_word = ''.join(word_list)
             self.final_list.append(new_word)
-        return self.final_list
+        self.token_list=self.final_list
+        return self
     
         
     def calculate_distance(self, x1,y1,x2,y2):
@@ -465,4 +471,5 @@ class spell_mistake:
                 word_list.append(letter)
                 new_word = ''.join(word_list)
             self.final_list.append(new_word)
-        return self.final_list
+        self.token_list=self.final_list
+        return self
