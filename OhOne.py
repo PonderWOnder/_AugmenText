@@ -300,7 +300,7 @@ class aug_loader:
         '''
         if len(word)>1:    
             while True:
-                if word[-1] in self.signs: #not good for dosages
+                if word[-1] in self.signs and len(word)>1: #not good for dosages
                     word=word[:-1]
                 else:
                     break
@@ -781,7 +781,10 @@ class aug_loader:
             info=self.dictionary[pos]
         elif type(word)==int:
             info=self.dictionary[word]
-        if list in [type(i) for i in info]:
+        elif type(word)==list:
+            pos=self.find_it(word[0])
+            info=self.dictionary[pos]
+        if list in [type(x) for x in info]:
             for num,i in enumerate(info):
                 if type(i)==list:
                     if i[ant]==[]:
@@ -906,7 +909,10 @@ class aug_loader:
         try:
             location=os.path.abspath(location)
             with open(location, "r") as fp:
-                self.dictionary=load(fp)
+                self.dictionary=[list(map(
+                    lambda i:tuple(i) if type(i)==list and 
+                    len(i)==2 and 
+                    str in [type(q) for q in i] else i,x)) for x in load(fp)]
         except:
             print('Can\'t find .new file @ '+location,end=' ')
             location=input('Please specify location: ')
@@ -960,14 +966,15 @@ class aug_loader:
         #     self.multi_proc(things_todo)
         # input(':')
         return self
-    
-    
+
+      
     def _run_2(self):
         '''Actual execution order for pipeline tasks
 
         Returns
         -------
         None.
+
 
         '''
         self.add_to_bib() 
@@ -977,21 +984,20 @@ class aug_loader:
         stuff_todo=self.create_task_list()
         for things_todo in stuff_todo:
             self.multi_proc(things_todo)
+        #self._save_dict()
         input(':')
         return self
 
+from Augmentext_Functions import spell_mistake
         
-class aug_input(aug_loader):
+class aug_input(aug_loader,spell_mistake):
     
     def __init__(self, files=None):
         aug_loader.__init__(self,path_to_text=files)
         self.run()
-    
-
+        spell_mistake.__init__=(self,[self.bib[key][1] for key in self.bib])
         
 
-class input_aug(aug_loader):
-    pass     
 
 
 
