@@ -10,7 +10,7 @@ from sys import stdout
 import threading as th
 import multiprocessing as mp
 import time
-import nltk.tokenize as token
+import nltk.tokenize as to_token
 from json import load, dump
 from hashlib import md5
 from random import randint
@@ -69,6 +69,7 @@ class aug_loader:
         self.lock=mp.Lock()#function to coordinate dictioary writes in multiprocessing enviorment
         self.vector_size=0#depented on the amount of individual words used in text.  Since transformations are applied to text value most likely will be estimated by propabilities of transforamtion
         self.lower_letters=[chr(i) for i in range(97,123)]
+        print('Konsti loaded')
         
     def dir_file_or_url(self,location):
         '''Checks input type.
@@ -163,7 +164,7 @@ class aug_loader:
     
     
     def nltk_split_text(self,text):
-        sep=[token.word_tokenize,token.sent_tokenize]
+        sep=[to_token.word_tokenize,to_token.sent_tokenize]
         return [i(text) for i in sep]
     
     
@@ -276,8 +277,8 @@ class aug_loader:
             self.somepath=temp_list
         
         elif type(self.somepath) is dict:
-            for key, string in self.somepath.items():
-                self.bib[self.hash_it(key)]=string
+            for key, read_string in self.somepath.items():
+                self.bib[self.hash_it(key)]=read_string
             self.somepath=list(self.somepath.keys())
         
         elif any(type(self.somepath) is supported_types for supported_types in [None,str,list,dict])==False:
@@ -988,15 +989,7 @@ class aug_loader:
         input(':')
         return self
 
-from Augmentext_Functions import spell_mistake
-        
-class aug_input(aug_loader,spell_mistake):
-    
-    def __init__(self, files=None):
-        aug_loader.__init__(self,path_to_text=files)
-        self.run()
-        spell_mistake.__init__=(self,[self.bib[key][1] for key in self.bib])
-        
+
 
 
 

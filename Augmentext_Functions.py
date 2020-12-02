@@ -1,7 +1,7 @@
 import random
 import string
-import re
-from typing import Dict, List, Union
+# import re
+# from typing import Dict, List, Union
 
 # define the output, quick summary what the function exactly does
 
@@ -12,9 +12,9 @@ from typing import Dict, List, Union
 #double_letter
 #space_insert
 
-class spell_mistake():
+class spell_mistake:
     
-    def __init__(self, token_list):
+    def __init__(self, token_list=None):
         self.token_list = token_list
 
         self.neighbours = {
@@ -160,6 +160,7 @@ class spell_mistake():
             }
 
         self.all_chars = [x for x in self.keyboard_positions_upper] + [x for x in self.keyboard_positions_lower]
+        print('Andi loaded')
 
     def random_spell_mistake(self, p=0.01):   
         """
