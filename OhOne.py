@@ -779,17 +779,13 @@ class aug_loader:
         if type(word)==str:
             pos=self.find_it(word)
             info=self.dictionary[pos]
-            print(info)
         elif type(word)==int:
             info=self.dictionary[word]
-            print(info)
         elif type(word)==list:
             pos=self.find_it(word[0])
             info=self.dictionary[pos]
-            print(info)
         if list in [type(x) for x in info]:
             for num,i in enumerate(info):
-                print(i)
                 if type(i)==list:
                     if i[ant]==[]:
                         stdout.write('No '+what_it_is[ant]+' found for '+word)
@@ -991,11 +987,13 @@ class aug_loader:
         input(':')
         return self
 
+from Augmentext_Functions import spell_mistake
         
-class aug_input(aug_loader):
+class aug_input(aug_loader,spell_mistake):
     
     def __init__(self, files=None):
         aug_loader.__init__(self,path_to_text=files)
+        spell_mistake.__init__=(self,[self.bib[key][1] for key in self.bib])
         self.run()
     
 
