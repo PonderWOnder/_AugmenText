@@ -364,7 +364,7 @@ class aug_loader:
         return pos             
             
         
-    def add_words(self,liste,occurrence=0):
+    def add_words(self,liste=None,occurrence=0):
         '''adds tokens to the dictionary either counting their appearence or not. For larger corpus (10**6) it switches in threaded mode
 
         Parameters
@@ -379,9 +379,20 @@ class aug_loader:
             DESCRIPTION. position string pairs to be added into self.dictionary at position
 
         '''
-        self.seg_length=10000000
-        if len(liste)>self.seg_length: 
-            self.threaded([self.add_words,'addwords',liste])
+        if type(None)==type(liste):
+            liste=self.token_list
+        self.seg_length=100000
+        if len(liste)>self.seg_length:
+            self.num_segs=mp.cpu_count()
+            stepsize=int(len(liste)/self.num_segs)
+            stuff_todo=[]
+            for i in range(0,len(liste),stepsize):
+                rest=len(liste)%stepsize
+                if rest==len(liste)-i:
+                    add=rest
+                else:
+                    add=0
+                stuff_todo.append([self.add_words,liste[i:i+stepsize+add]])
         else:
             for i in liste:
                 i=self.word_it(i)
@@ -452,9 +463,9 @@ class aug_loader:
                         stdout.write('\r'+i+' added at Position '+str(pos)+'\n')# if there are no open positiones anymore
                     # if type(self.dictionary)==type(mp.Manager().list()):   
                     #     self.lock.release()
+        return
     
-    
-    def threaded(self,func):
+    def __threaded(self,func):
         '''Multi threading setup to handel processes in parallel
 
         Parameters
@@ -854,7 +865,7 @@ class aug_loader:
         stdout.write(str(len(process_list))+' processes took '+str(int(k/60))+'min '+str(int(k%60))+'sec\n\n')
     
     
-    def create_task_list(self):
+    def _create_task_list(self):
         '''Actual execution order for multiprocessed tasks
 
         Returns
@@ -946,7 +957,7 @@ class aug_loader:
             location=input('Please specify location: ')
             self.__save_dict(location)
 
-            
+                
     
     def run(self):
         '''Actual execution order for pipeline tasks
@@ -982,7 +993,7 @@ class aug_loader:
         self._load_dict()
         self.build_dict()
         self.syno_ant()
-        stuff_todo=self.create_task_list()
+        stuff_todo=self._create_task_list()
         for things_todo in stuff_todo:
             self.multi_proc(things_todo)
         #self._save_dict()
