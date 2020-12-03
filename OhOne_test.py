@@ -36,8 +36,8 @@ class augmentor(spell_mistake,aug_loader):
 
 if __name__ == "__main__":
     liste=[os.path.abspath(''),
-           'https://medium.com/@justinboylantoomey/fast-text-extraction-with-python-and-tika-41ac34b0fe61',
-           'https://en.wikipedia.org/wiki/Tokenization_(lexical_analysis)']
+            'https://medium.com/@justinboylantoomey/fast-text-extraction-with-python-and-tika-41ac34b0fe61',
+            'https://en.wikipedia.org/wiki/Tokenization_(lexical_analysis)']
     sometest=augmentor(liste)
 
 
