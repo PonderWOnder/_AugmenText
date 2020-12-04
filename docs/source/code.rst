@@ -7,10 +7,8 @@ Documentation of Augmentext_Functions
     :members:
     :undoc-members:
 
+Documentation of OhOne
+-------------------------------------
 .. automodule:: OhOne_doku
-    :members:
-    :undoc-members:
-
-.. automodule:: Feature_Extractions_doku
     :members:
     :undoc-members:
