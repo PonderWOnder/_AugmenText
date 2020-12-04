@@ -34,6 +34,8 @@ class aug_loader:
                                                                 'Ä','Ü','Ö']):
         '''
         
+        
+        
         :param path_to_text: The default is None.
         :type path_to_text: Type
         :param dictionary: The default is None.
@@ -44,9 +46,11 @@ class aug_loader:
         :type dict_size: Type
         :param signs: The default is [' ','.',',','-',':',')'].
         :type sings: Type
-        :param list_of_supported_files: The default is ['.doc','.pdf','http:','https:','www.','.htm','.txt'].
+        :param list_of_supported_files: The default is 
+        ['.doc','.pdf','http:','https:','www.','.htm','.txt'].
         :type list_of_supported_files: Type
-        :param supported_chr: The default is [chr(i) for i in range(32,127)]+['ä','ü','ö','Ä','Ü','Ö'].
+        :param supported_chr: The default is 
+        [chr(i) for i in range(32,127)]+['ä','ü','ö','Ä','Ü','Ö'].
         :type supported_chr: Type
         :return: None
         '''
@@ -71,7 +75,8 @@ class aug_loader:
         
         :param location: The list of resource identifiers or directories.
         :type location: list of strings
-        :return: Returns only values that carry predefined strings in a List of strings.
+        :return: Returns only values that carry predefined strings in a List 
+        of strings.
        '''
        
         if any(phrase in location for phrase in self.list_of_supported_files):      #very brittle going to be updated
@@ -125,7 +130,9 @@ class aug_loader:
         
         :param string: Containing special characters
         :type string: String
-        :yields: Splitted Input string by its special characters an just returns words inside self.dictionary as list of strings and passes them into addwords.
+        :yields: Splitted Input string by its special characters an just 
+        returns words inside self.dictionary as list of strings and passes them
+        into addwords.
         '''
         
         clean_string=''
@@ -153,7 +160,8 @@ class aug_loader:
         
         :param text: Whole document which is going to be tokenized
         :type text: String
-        :return: Returns String in Lists in List that were seperated by individual words and sentences.
+        :return: Returns String in Lists in List that were seperated by 
+        individual words and sentences.
         '''
         sep=[to_token.word_tokenize,to_token.sent_tokenize]
         return [i(text) for i in sep]
@@ -165,9 +173,11 @@ class aug_loader:
         
         :param text: Whole document which is going to be tokenized
         :type text: String
-        :param corpus: Optional Value that determins for how many seperation character should be accounted for.
+        :param corpus: Optional Value that determins for how many seperation 
+        character should be accounted for.
         :type corpus: Integer
-        :return: Returns lists that were seperated by characters in sep (max lenth = 5)
+        :return: Returns lists that were seperated by characters in sep 
+        (max lenth = 5)
         '''
        
         sep=['',' ','.','\n','\t','\r']
@@ -178,11 +188,13 @@ class aug_loader:
     
     def drop_stuff(self,text): 
         '''
-        Checks text for non predefined ASCII values and replaces them with an empty string.
+        Checks text for non predefined ASCII values and replaces them with an 
+        empty string.
         
         :param text: Single word out of the tokenizer
         :type text: String
-        :return: Cleaned from everything that is not in self.supported_chr in string.
+        :return: Cleaned from everything that is not in self.supported_chr in 
+        string.
         '''
         
         supp_chr=self.supported_chr
@@ -192,11 +204,13 @@ class aug_loader:
     
     def work_through(self):
         '''
-        Applies tokenizer to extend self.bib(bibliography) entries by tokenized representations of text
+        Applies tokenizer to extend self.bib(bibliography) entries by 
+        tokenized representations of text
         
         :param self: Adds return of self.slit_text to self.bib
         :type self: List of strings
-        :yields: Adds the return of self.split_text to self.bib in a List of strings
+        :yields: Adds the return of self.split_text to self.bib in a List of 
+        strings
         '''
         
         for key in self.bib.keys():
@@ -207,11 +221,13 @@ class aug_loader:
     
     def add_to_bib(self):
         '''
-        Adds entries to self.bib(bibliography). Depend on their type different interfaces are used.
+        Adds entries to self.bib(bibliography). Depend on their type different 
+        interfaces are used.
         
         :param path_list: List of resource identifiers (self.somepath).
         :type path_list: List
-        :yields: Full text entries to self.bib(bibliography) as one string in List.
+        :yields: Full text entries to self.bib(bibliography) as one string in 
+        List.
         '''
         
         self.inputtype_detect()
@@ -240,9 +256,9 @@ class aug_loader:
     
         
     def inputtype_detect(self):
-        '''
-        
-        Handles various different ways of supplying locations of text corpus provided by URLs in self.somepath variable from the constructor.
+        '''        
+        Handles various different ways of supplying locations of text corpus 
+        provided by URLs in self.somepath variable from the constructor.
         :return: None
         '''
         
@@ -274,7 +290,8 @@ class aug_loader:
         
         :param word: Single tokenized word to be standardized.
         :type word: String
-        :return: Dropped everything on the end of the word that is in self.sings in string.
+        :return: Dropped everything on the end of the word that is in 
+        self.sings string.
         '''
         
         if len(word)>1:    
@@ -288,11 +305,13 @@ class aug_loader:
     
     def hash_it(self,word):
         '''
-        Standardizes and numerically hashes string that resembles a word, sentence or paragraph although word would be preferable.
+        Standardizes and numerically hashes string that resembles a word, 
+        sentence or paragraph although word would be preferable.
         
         :param word: Unaltered string most likly from the tokenizer.
         :type word: String
-        :return: Numerical hash representation of to provided string in integer.
+        :return: Numerical hash representation of to provided string in 
+        integer.
         '''
         
         return int(md5(str.encode(self.word_it(word))).hexdigest(),16)%self.dict_size
@@ -300,11 +319,13 @@ class aug_loader:
     
     def is_it_in_yet(self,word):
         '''
-        Checks if word is already in self.dictionary and returns its position also considering hash collissions if word is already in dic
+        Checks if word is already in self.dictionary and returns its position 
+        also considering hash collissions if word is already in dic
         
         :param word: Some unaltered word
         :type word: String
-        :return: True if word returns true if word is in self.dictionary in string
+        :return: True if word returns true if word is in self.dictionary in 
+        string
         '''
         
         word=self.word_it(word)
@@ -326,19 +347,29 @@ class aug_loader:
 
 
     def find_it(self,word):
-        _,pos=self.is_it_in_yet(word)
-        return pos             
+        '''
+        Takes string and checks if it is in lexikon
+        
+        :param word: Unaltered string most likly from the tokenizer.
+        :type word: String
+        :return: Numerical hash representation of to provided or Failure string
+        if word is not in lexikon
+        '''
+        tf,pos=self.is_it_in_yet(word)
+        return pos if tf==True else 'Failure'             
             
         
     def add_words(self,liste=None,occurrence=0):
         '''
-        Adds tokens to the dictionary either counting their appearence or not. For larger corpus (10**6) it switches in threaded mode
+        Adds tokens to the dictionary either counting their appearence or not. 
+        For larger corpus (10**6) it switches in threaded mode
         
         :param liste: Words from self.bib.
         :type liste: List
         :param occurence: The default is1.
         :type occurence: Integer
-        :yields: Postition string pairs to be added into self.dictionary at position
+        :yields: Postition string pairs to be added into self.dictionary at 
+        position
         '''
         
         if type(None)==type(liste):
@@ -431,7 +462,8 @@ class aug_loader:
         '''
         Multi threading setup to handel processes in parallel.
         
-        :param func: Includes function, handler name for function and argument for function.
+        :param func: Includes function, handler name for function and argument 
+        for function.
         :type func: List
         :return: None
         '''
@@ -460,7 +492,9 @@ class aug_loader:
     
     def build_dict(self,path=os.path.abspath('dictionary/words.txt')): 
         '''
-        Maps words from line seperated txt provided in parameter path to hash postions in list self.dictionary. Does not do any hash collission detection!
+        Maps words from line seperated txt provided in parameter path to hash 
+        postions in list self.dictionary. Does not do any hash collission 
+        detection!
         
         :param path: Locates the dictionary txt '~dictionary/words.txt').
         :type path: String
@@ -497,7 +531,9 @@ class aug_loader:
      
     def threaded_build(self,seg,seg2):
         '''
-        Detects collissions in segments of self.dictionary and maps them to empty positions within the segment. Should only be used if no other processes has altered self.dictionary
+        Detects collissions in segments of self.dictionary and maps them to 
+        empty positions within the segment. Should only be used if no other 
+        processes has altered self.dictionary
         
         :param seg: Beginning
         :type seg: Integer
@@ -533,11 +569,17 @@ class aug_loader:
     
     def __syno_ant(self,syn_loc=None):
         '''
-        Far to long function to transform synonym dictionary provided under the location parameter into useable input to append self.dictionary with synonym capabilities.
+        Far to long function to transform synonym dictionary provided under the
+        location parameter into useable input to append self.dictionary with 
+        synonym capabilities.
         
-        :param syn_loc: The defailt is None but is later changed to self.syn_ant which is location of synonym antonym dictionary. Function would work with any other.
+        :param syn_loc: The defailt is None but is later changed to 
+        self.syn_ant which is location of synonym antonym dictionary. 
+        Function would work with any other.
+        
         :type syn_loc: None
-        :yields: List of strings of entries in this specific synonym antonym dictionary. 
+        :yields: List of strings of entries in this specific synonym antonym 
+        dictionary. 
         '''
         
         if syn_loc==None:
@@ -646,7 +688,8 @@ class aug_loader:
     
     def add_syns(self,seg1,seg2):
         '''
-        Adding synonyms from self.syn_list tailored to be passed into multi_proc modul for faster processing.
+        Adding synonyms from self.syn_list tailored to be passed into 
+        multi_proc modul for faster processing.
         
         :param seg1: Beginning
         :type seg1: Integer
@@ -767,7 +810,8 @@ class aug_loader:
             
     def multi_proc(self,things_todo):
         '''
-        Multi processing setup to handel processes in parallel on different CPU Cores.
+        Multi processing setup to handel processes in parallel on different 
+        CPU Cores.
         
         :param things_todo: Function and args.
         :type things_todo: List of Items
@@ -795,7 +839,8 @@ class aug_loader:
         '''
         Actual execution order for multiprocessed tasks.
         
-        :return: Contains Includes function and argument for function in List of Lists.
+        :return: Contains Includes function and argument for function in 
+        List of Lists.
         '''
         
         stuff_todo=[]
@@ -829,8 +874,7 @@ class aug_loader:
     
     
     def _load_dict(self,location='ouput.new'):
-        '''
-        
+        '''        
         :param location: The default is 'output.new'
         :type location: String
         :return: None
@@ -851,8 +895,7 @@ class aug_loader:
 
 
     def _save_dict(self,location='ouput.new'):
-        '''
-        
+        '''        
         :param location: the default is 'output.new'
         :type location: String
         :return: None
@@ -872,8 +915,7 @@ class aug_loader:
                 
     
     def run(self):
-        '''
-        
+        '''        
         Actual execution order for pipeline tasks
         :return: None
         '''
@@ -892,8 +934,7 @@ class aug_loader:
 
       
     def _run_2(self):
-        '''
-        
+        '''        
         Actual execution order for pipeline tasks
         :return: None
         '''

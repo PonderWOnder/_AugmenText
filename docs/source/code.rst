@@ -1,14 +1,20 @@
-Auto-generated Documentation
-============================
+Documentation of Augmentext Package
+***********************************
 
-Documentation of Augmentext_Functions
--------------------------------------
-.. automodule:: Augmentext_Functions_doku
+Documentation of Word transforming Functions
+--------------------------------------------
+.. automodule:: word_functions
     :members:
     :undoc-members:
 
-Documentation of OhOne
--------------------------------------
-.. automodule:: OhOne_doku
+Documentation of Lexikon and Bibliography Management
+----------------------------------------------------
+.. automodule:: loader
+    :members:
+    :undoc-members:
+	
+Documentation of Feature extracting Modul
+-----------------------------------------
+.. automodule:: feature_extraction
     :members:
     :undoc-members:

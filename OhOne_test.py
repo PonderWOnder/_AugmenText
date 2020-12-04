@@ -9,8 +9,8 @@ E-Mail: 'ds181019,ds182001,ds181026,ds181009@fhstp.ac.at'
 import os
 from sys import stdout
 from functools import reduce
-from OhOne import aug_loader
-from Augmentext_Functions import spell_mistake
+from loader import aug_loader
+from word_functions import spell_mistake
         
 class augmentor(spell_mistake,aug_loader):
     
@@ -34,6 +34,7 @@ class augmentor(spell_mistake,aug_loader):
         return
     
     def save_transformed_list(self):
+        self.add_words(self.token_list)
         self.buffer.append(self.token_list)
         return 
     
