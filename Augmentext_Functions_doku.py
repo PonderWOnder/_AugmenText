@@ -166,8 +166,8 @@ class spell_mistake:
         """
         Inserts random typos with a certain probability.
         :param p: This represents the probability a letter gets exchanged by random letter. The default is 0.01.
-        :type p: float
-        :return: yields
+        :type p: Float
+        :yields: List with the modified tokens in List of strings in final_list.
         """
         
         letters = string.ascii_lowercase
@@ -192,8 +192,8 @@ class spell_mistake:
         Inserts typos based on neighbour keys on a German keyboard with a certain
         probability.
         :param p: Probability of echanging a letter with a neighbour letter. The default is 0.01.
-        :type p: float
-        :return: yields
+        :type p: Float
+        :yields: List with the modified tokens in List of strings in final_list.
         """
         
         self.final_list = []
@@ -220,8 +220,8 @@ class spell_mistake:
         """
         Skips random characters with a certain probability.
         :param p: Probabilty of exchanging a letter with an empty string (i.e to skip it). The default is 0.01.
-        type p: float
-        :return: yields
+        type p: Float
+        :yields: List with the modified tokens in List of strings in final_list.
         """
         
         self.final_list = []
@@ -242,8 +242,8 @@ class spell_mistake:
         """
         Flips two neighbouring characters with a certain probability.
         :param p: Probability that 2 random (neighbour) letters get switched. The default is 0.01.
-        :type p: float
-        :return: yields
+        :type p: Float
+        :yields: List with the modified tokens in List of strings in final_list.
         """
         
         self.final_list = []
@@ -263,8 +263,8 @@ class spell_mistake:
         """
         Inserts random spaces in a word with a certain probability.  
         :param p: Probability of inserting a random space between two letters. The default is 0.01.
-        :type p: float
-        :return: yields
+        :type p: Float
+        :yields: List with the modified text in List of strings in final_list.
         """
         self.final_list = []
         for token in self.token_list:
@@ -283,8 +283,8 @@ class spell_mistake:
         """
         Doubles characters with a certain probability.
         :param p: Probabilty that a certain letter occures twice in a row. The default is 0.01 
-        :type p : float
-        :return: yields
+        :type p : Float
+        :yields: List with the modified tokens in List of strings in final_list.
         """
         
         self.final_list = []
@@ -304,14 +304,14 @@ class spell_mistake:
         """
         Calculates the euclidean distance between two points in a two-dimensional space.
         :param x1: x coordinate of first point
-        :type x1: int
+        :type x1: Integer
         :param y1: Y coordinate of first point
-        :type y1: int
+        :type y1: Integer
         :param x2: x coordinate of secount point
-        :type x2: int
+        :type x2: Integer
         :param y2: y coordinate of secound point
-        :type y2: int
-        :return: eucledian distance between point x and y
+        :type y2: Integer
+        :return: Eucledian distance between point x and y.
         """
         xdist = x2-x1
         ydist = y2-y1
@@ -323,7 +323,7 @@ class spell_mistake:
         Calculates probabilities for all misspelling options of a letter. The closer
         the keys are to each other, the higher the probability will be.
         :param key: a single character
-        :type key: str
+        :type key: String
         :return: keys are the letters, values are the assigned probabilities from either the upper or lower keyboard, depending on the original letter.
         """
         sum_inverse_dists = 0
@@ -349,9 +349,9 @@ class spell_mistake:
         """
         Picks a random letter according to the probability distribution from
         calculating_probs.
-        :param prob_dist: The return from calculating_probs, keys are letters, values are probabilities
-        :type prob_list: dictionary
-        :return: A random letter accoring to the probability dictionary, picked through random choices
+        :param prob_dist: The return from calculating_probs, keys are letters, values are probabilities.
+        :type prob_list: Dictionary
+        :return: A random letter accoring to the probability dictionary, picked through random choices.
         """
         letters = []
         probs = []
@@ -367,8 +367,8 @@ class spell_mistake:
         Inserts typos based on a probability distribution calculated based on the
         keyboard distances.
         :param p: Probability of altering a single letter. The default is 0.01.
-        :type p: float
-        :return: yields
+        :type p: Float
+        :yields: List of altered strings or tokens in List of Strings in final_list.
         """
         self.final_list = []
         for token in self.token_list:
