@@ -771,7 +771,7 @@ class aug_loader:
             stdout.write(' '+str(where_to)+'\n ')
     
     
-    def find_syn(self,word,ant=False):
+    def _find_syn(self,word,ant=False):
         '''finds synonyms prefering first entries
 
         Parameters
@@ -833,7 +833,8 @@ class aug_loader:
                 stdout.write('\rLoading'+' ['+'||'*int(tot_prog/(length/10))+']'+str(round(tot_prog/length*100,4))+'% ')
         stdout.write('\r100.0%\t'+str(tot_prog)+'\t\t\n')
 
-            
+
+         
     def multi_proc(self,things_todo):
         '''Multi processing setup to handel processes in parallel on different CPU Cores
         
