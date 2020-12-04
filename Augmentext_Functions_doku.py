@@ -165,6 +165,7 @@ class spell_mistake:
     def random_spell_mistake(self, p=0.01):   
         """
         Inserts random typos with a certain probability.
+        
         :param p: This represents the probability a letter gets exchanged by random letter. The default is 0.01.
         :type p: Float
         :yields: List with the modified tokens in List of strings in final_list.
@@ -191,6 +192,7 @@ class spell_mistake:
         """
         Inserts typos based on neighbour keys on a German keyboard with a certain
         probability.
+        
         :param p: Probability of echanging a letter with a neighbour letter. The default is 0.01.
         :type p: Float
         :yields: List with the modified tokens in List of strings in final_list.
@@ -219,6 +221,7 @@ class spell_mistake:
     def letter_skip(self, p=0.01):
         """
         Skips random characters with a certain probability.
+        
         :param p: Probabilty of exchanging a letter with an empty string (i.e to skip it). The default is 0.01.
         type p: Float
         :yields: List with the modified tokens in List of strings in final_list.
@@ -241,6 +244,7 @@ class spell_mistake:
     def letter_flip(self, p=0.01):
         """
         Flips two neighbouring characters with a certain probability.
+        
         :param p: Probability that 2 random (neighbour) letters get switched. The default is 0.01.
         :type p: Float
         :yields: List with the modified tokens in List of strings in final_list.
@@ -262,6 +266,7 @@ class spell_mistake:
     def space_inserter (self, p=0.01):
         """
         Inserts random spaces in a word with a certain probability.  
+        
         :param p: Probability of inserting a random space between two letters. The default is 0.01.
         :type p: Float
         :yields: List with the modified text in List of strings in final_list.
@@ -282,6 +287,7 @@ class spell_mistake:
     def double_letter(self, p=0.01):
         """
         Doubles characters with a certain probability.
+        
         :param p: Probabilty that a certain letter occures twice in a row. The default is 0.01 
         :type p : Float
         :yields: List with the modified tokens in List of strings in final_list.
@@ -303,6 +309,7 @@ class spell_mistake:
     def calculate_distance(self, x1,y1,x2,y2):
         """
         Calculates the euclidean distance between two points in a two-dimensional space.
+        
         :param x1: x coordinate of first point
         :type x1: Integer
         :param y1: Y coordinate of first point
@@ -322,6 +329,7 @@ class spell_mistake:
         """
         Calculates probabilities for all misspelling options of a letter. The closer
         the keys are to each other, the higher the probability will be.
+        
         :param key: a single character
         :type key: String
         :return: keys are the letters, values are the assigned probabilities from either the upper or lower keyboard, depending on the original letter.
@@ -349,6 +357,7 @@ class spell_mistake:
         """
         Picks a random letter according to the probability distribution from
         calculating_probs.
+        
         :param prob_dist: The return from calculating_probs, keys are letters, values are probabilities.
         :type prob_list: Dictionary
         :return: A random letter accoring to the probability dictionary, picked through random choices.
@@ -366,6 +375,7 @@ class spell_mistake:
         """
         Inserts typos based on a probability distribution calculated based on the
         keyboard distances.
+        
         :param p: Probability of altering a single letter. The default is 0.01.
         :type p: Float
         :yields: List of altered strings or tokens in List of Strings in final_list.
