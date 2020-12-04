@@ -33,6 +33,7 @@ class aug_loader:
                  supported_chr=[chr(i) for i in range(32,127)]+['ä','ü','ö',
                                                                 'Ä','Ü','Ö']):
         '''
+        
         :param path_to_text: The default is None.
         :type path_to_text: Type
         :param dictionary: The default is None.
@@ -67,6 +68,7 @@ class aug_loader:
     def dir_file_or_url(self,location):
         '''
         Checks input type.
+        
         :param location: The list of resource identifiers or directories.
         :type location: list of strings
         :return: Returns only values that carry predefined strings in a List of strings.
@@ -94,6 +96,7 @@ class aug_loader:
     def load_txt(self,location): #TXT
         '''
         Handels txt files.
+        
         :param location: Resource identifier pointing towards local file.
         :type location: string
         :return: Text in file in string.
@@ -118,7 +121,8 @@ class aug_loader:
     def _word_asstimator(self,string): 
         '''
         Handles Links in text by spliting them into words present 
-        in the dictionary and droping everything else
+        in the dictionary and droping everything else.
+        
         :param string: Containing special characters
         :type string: String
         :yields: Splitted Input string by its special characters an just returns words inside self.dictionary as list of strings and passes them into addwords.
@@ -146,6 +150,7 @@ class aug_loader:
     def nltk_split_text(self,text):
         '''
         Basic NLTK tokenizer for words and sentences.
+        
         :param text: Whole document which is going to be tokenized
         :type text: String
         :return: Returns String in Lists in List that were seperated by individual words and sentences.
@@ -157,6 +162,7 @@ class aug_loader:
     def split_text(self,text,corpus=3):
         '''
         Basic tokenizer. Will be replaced by nltk in th future.
+        
         :param text: Whole document which is going to be tokenized
         :type text: String
         :param corpus: Optional Value that determins for how many seperation character should be accounted for.
@@ -173,6 +179,7 @@ class aug_loader:
     def drop_stuff(self,text): 
         '''
         Checks text for non predefined ASCII values and replaces them with an empty string.
+        
         :param text: Single word out of the tokenizer
         :type text: String
         :return: Cleaned from everything that is not in self.supported_chr in string.
@@ -186,6 +193,7 @@ class aug_loader:
     def work_through(self):
         '''
         Applies tokenizer to extend self.bib(bibliography) entries by tokenized representations of text
+        
         :param self: Adds return of self.slit_text to self.bib
         :type self: List of strings
         :yields: Adds the return of self.split_text to self.bib in a List of strings
@@ -200,6 +208,7 @@ class aug_loader:
     def add_to_bib(self):
         '''
         Adds entries to self.bib(bibliography). Depend on their type different interfaces are used.
+        
         :param path_list: List of resource identifiers (self.somepath).
         :type path_list: List
         :yields: Full text entries to self.bib(bibliography) as one string in List.
@@ -232,6 +241,7 @@ class aug_loader:
         
     def inputtype_detect(self):
         '''
+        
         Handles various different ways of supplying locations of text corpus provided by URLs in self.somepath variable from the constructor.
         :return: None
         '''
@@ -261,6 +271,7 @@ class aug_loader:
     def word_it(self,word):
         '''
         Standardizes strings for hashing. Drops . , on the and for example.
+        
         :param word: Single tokenized word to be standardized.
         :type word: String
         :return: Dropped everything on the end of the word that is in self.sings in string.
@@ -278,6 +289,7 @@ class aug_loader:
     def hash_it(self,word):
         '''
         Standardizes and numerically hashes string that resembles a word, sentence or paragraph although word would be preferable.
+        
         :param word: Unaltered string most likly from the tokenizer.
         :type word: String
         :return: Numerical hash representation of to provided string in integer.
@@ -289,6 +301,7 @@ class aug_loader:
     def is_it_in_yet(self,word):
         '''
         Checks if word is already in self.dictionary and returns its position also considering hash collissions if word is already in dic
+        
         :param word: Some unaltered word
         :type word: String
         :return: True if word returns true if word is in self.dictionary in string
@@ -320,6 +333,7 @@ class aug_loader:
     def add_words(self,liste=None,occurrence=0):
         '''
         Adds tokens to the dictionary either counting their appearence or not. For larger corpus (10**6) it switches in threaded mode
+        
         :param liste: Words from self.bib.
         :type liste: List
         :param occurence: The default is1.
@@ -415,20 +429,13 @@ class aug_loader:
     
     def __threaded(self,func):
         '''
-        Multi threading setup to handel processes in parallel
+        Multi threading setup to handel processes in parallel.
+        
         :param func: Includes function, handler name for function and argument for function.
         :type func: List
-
-        Parameters
-        ----------
-        func : list
-            DESCRIPTION. Includes function, handler name for function and argument for function.
-
-        Returns
-        -------
-        None.
-
+        :return: None
         '''
+        
         if len(func)>2:
             for i in range(2,len(func[2])):
                 if len(func[2])/i < self.seg_length:        
@@ -454,6 +461,7 @@ class aug_loader:
     def build_dict(self,path=os.path.abspath('dictionary/words.txt')): 
         '''
         Maps words from line seperated txt provided in parameter path to hash postions in list self.dictionary. Does not do any hash collission detection!
+        
         :param path: Locates the dictionary txt '~dictionary/words.txt').
         :type path: String
         :yields: Crued self.dict not checked for collisions.
@@ -490,6 +498,7 @@ class aug_loader:
     def threaded_build(self,seg,seg2):
         '''
         Detects collissions in segments of self.dictionary and maps them to empty positions within the segment. Should only be used if no other processes has altered self.dictionary
+        
         :param seg: Beginning
         :type seg: Integer
         :param seg2: End
@@ -525,6 +534,7 @@ class aug_loader:
     def __syno_ant(self,syn_loc=None):
         '''
         Far to long function to transform synonym dictionary provided under the location parameter into useable input to append self.dictionary with synonym capabilities.
+        
         :param syn_loc: The defailt is None but is later changed to self.syn_ant which is location of synonym antonym dictionary. Function would work with any other.
         :type syn_loc: None
         :yields: List of strings of entries in this specific synonym antonym dictionary. 
@@ -637,6 +647,7 @@ class aug_loader:
     def add_syns(self,seg1,seg2):
         '''
         Adding synonyms from self.syn_list tailored to be passed into multi_proc modul for faster processing.
+        
         :param seg1: Beginning
         :type seg1: Integer
         :param seg2: End
@@ -703,6 +714,7 @@ class aug_loader:
     def find_syn(self,word,ant=False):
         '''
         Finds synonyms prefering first entries
+        
         :param word: Function chooses how to progress
         :type word: String orInteger
         :param ant: Choose antonym if True. The default is False.
@@ -740,6 +752,7 @@ class aug_loader:
     def load_bar(self,length,increment):
         '''
         Just a for fun progressbar for initial hash collission detection.
+        
         :param length: To set the total amount of entries that will be changed
         :type length: Integer
         :return: None
@@ -755,6 +768,7 @@ class aug_loader:
     def multi_proc(self,things_todo):
         '''
         Multi processing setup to handel processes in parallel on different CPU Cores.
+        
         :param things_todo: Function and args.
         :type things_todo: List of Items
         :returns: None
@@ -780,6 +794,7 @@ class aug_loader:
     def _create_task_list(self):
         '''
         Actual execution order for multiprocessed tasks.
+        
         :return: Contains Includes function and argument for function in List of Lists.
         '''
         
@@ -815,6 +830,7 @@ class aug_loader:
     
     def _load_dict(self,location='ouput.new'):
         '''
+        
         :param location: The default is 'output.new'
         :type location: String
         :return: None
@@ -836,6 +852,7 @@ class aug_loader:
 
     def _save_dict(self,location='ouput.new'):
         '''
+        
         :param location: the default is 'output.new'
         :type location: String
         :return: None
@@ -856,6 +873,7 @@ class aug_loader:
     
     def run(self):
         '''
+        
         Actual execution order for pipeline tasks
         :return: None
         '''
@@ -875,6 +893,7 @@ class aug_loader:
       
     def _run_2(self):
         '''
+        
         Actual execution order for pipeline tasks
         :return: None
         '''
