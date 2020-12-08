@@ -32,7 +32,28 @@ class aug_loader:
                  list_of_supported_files=['.doc','.pdf','http:','https:','www.','.htm','.txt'],
                  supported_chr=[chr(i) for i in range(32,127)]+['ä','ü','ö',
                                                                 'Ä','Ü','Ö']):
-    
+        '''
+        
+        
+        
+        :param path_to_text: The default is None.
+        :type path_to_text: Type
+        :param dictionary: The default is None.
+        :type dictionary: Type
+        :param syn_loc: The default os.path.abspath('dictionary\Syn_Ant.txt').
+        :type syn_loc: Type
+        :param dict_size: The default is 10**6.
+        :type dict_size: Type
+        :param signs: The default is [' ','.',',','-',':',')'].
+        :type sings: Type
+        :param list_of_supported_files: The default is 
+        ['.doc','.pdf','http:','https:','www.','.htm','.txt'].
+        :type list_of_supported_files: Type
+        :param supported_chr: The default is 
+        [chr(i) for i in range(32,127)]+['ä','ü','ö','Ä','Ü','Ö'].
+        :type supported_chr: Type
+        :return: None
+        '''
         
         self.somepath=path_to_text#should be list of URLs pointing to text of some sort
         self.syn_ant=syn_loc
