@@ -32,28 +32,7 @@ class aug_loader:
                  list_of_supported_files=['.doc','.pdf','http:','https:','www.','.htm','.txt'],
                  supported_chr=[chr(i) for i in range(32,127)]+['ä','ü','ö',
                                                                 'Ä','Ü','Ö']):
-        '''
-        
-        
-        
-        :param path_to_text: The default is None.
-        :type path_to_text: Type
-        :param dictionary: The default is None.
-        :type dictionary: Type
-        :param syn_loc: The default os.path.abspath('dictionary\Syn_Ant.txt').
-        :type syn_loc: Type
-        :param dict_size: The default is 10**6.
-        :type dict_size: Type
-        :param signs: The default is [' ','.',',','-',':',')'].
-        :type sings: Type
-        :param list_of_supported_files: The default is 
-        ['.doc','.pdf','http:','https:','www.','.htm','.txt'].
-        :type list_of_supported_files: Type
-        :param supported_chr: The default is 
-        [chr(i) for i in range(32,127)]+['ä','ü','ö','Ä','Ü','Ö'].
-        :type supported_chr: Type
-        :return: None
-        '''
+    
         
         self.somepath=path_to_text#should be list of URLs pointing to text of some sort
         self.syn_ant=syn_loc
@@ -76,7 +55,7 @@ class aug_loader:
         :param location: The list of resource identifiers or directories.
         :type location: list of strings
         :return: Returns only values that carry predefined strings in a List 
-        of strings.
+                 of strings.
        '''
        
         if any(phrase in location for phrase in self.list_of_supported_files):      #very brittle going to be updated
@@ -161,7 +140,7 @@ class aug_loader:
         :param text: Whole document which is going to be tokenized
         :type text: String
         :return: Returns String in Lists in List that were seperated by 
-        individual words and sentences.
+                 individual words and sentences.
         '''
         sep=[to_token.word_tokenize,to_token.sent_tokenize]
         return [i(text) for i in sep]
@@ -174,10 +153,10 @@ class aug_loader:
         :param text: Whole document which is going to be tokenized
         :type text: String
         :param corpus: Optional Value that determins for how many seperation 
-        character should be accounted for.
+                       character should be accounted for.
         :type corpus: Integer
         :return: Returns lists that were seperated by characters in sep 
-        (max lenth = 5)
+                 (max lenth = 5)
         '''
        
         sep=['',' ','.','\n','\t','\r']
@@ -194,7 +173,7 @@ class aug_loader:
         :param text: Single word out of the tokenizer
         :type text: String
         :return: Cleaned from everything that is not in self.supported_chr in 
-        string.
+                 string.
         '''
         
         supp_chr=self.supported_chr
@@ -210,7 +189,7 @@ class aug_loader:
         :param self: Adds return of self.slit_text to self.bib
         :type self: List of strings
         :yields: Adds the return of self.split_text to self.bib in a List of 
-        strings
+                 strings
         '''
         
         for key in self.bib.keys():
@@ -220,14 +199,14 @@ class aug_loader:
     
     
     def add_to_bib(self):
-        '''
-        Adds entries to self.bib(bibliography). Depend on their type different 
-        interfaces are used.
+        ''' 
+        Adds entries to self.bib(bibliography). Depend on their type 
+        different interfaces are used.
         
         :param path_list: List of resource identifiers (self.somepath).
         :type path_list: List
         :yields: Full text entries to self.bib(bibliography) as one string in 
-        List.
+                 List.
         '''
         
         self.inputtype_detect()
@@ -259,6 +238,7 @@ class aug_loader:
         '''        
         Handles various different ways of supplying locations of text corpus 
         provided by URLs in self.somepath variable from the constructor.
+        
         :return: None
         '''
         
@@ -291,7 +271,7 @@ class aug_loader:
         :param word: Single tokenized word to be standardized.
         :type word: String
         :return: Dropped everything on the end of the word that is in 
-        self.sings string.
+                 self.sings string.
         '''
         
         if len(word)>1:    
@@ -311,7 +291,7 @@ class aug_loader:
         :param word: Unaltered string most likly from the tokenizer.
         :type word: String
         :return: Numerical hash representation of to provided string in 
-        integer.
+                 integer.
         '''
         
         return int(md5(str.encode(self.word_it(word))).hexdigest(),16)%self.dict_size
@@ -325,7 +305,7 @@ class aug_loader:
         :param word: Some unaltered word
         :type word: String
         :return: True if word returns true if word is in self.dictionary in 
-        string
+                 string
         '''
         
         word=self.word_it(word)
@@ -353,7 +333,7 @@ class aug_loader:
         :param word: Unaltered string most likly from the tokenizer.
         :type word: String
         :return: Numerical hash representation of to provided or Failure string
-        if word is not in lexikon
+                 if word is not in lexikon
         '''
         tf,pos=self.is_it_in_yet(word)
         return pos if tf==True else 'Failure'             
@@ -369,7 +349,7 @@ class aug_loader:
         :param occurence: The default is1.
         :type occurence: Integer
         :yields: Postition string pairs to be added into self.dictionary at 
-        position
+                 position
         '''
         
         if type(None)==type(liste):
@@ -917,7 +897,8 @@ class aug_loader:
     def run(self):
         '''        
         Actual execution order for pipeline tasks
-        :return: None
+        
+        :returns: None
         '''
         
         #self.inputtype_detect()
