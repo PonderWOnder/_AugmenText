@@ -33,9 +33,6 @@ class aug_loader:
                  supported_chr=[chr(i) for i in range(32,127)]+['ä','ü','ö',
                                                                 'Ä','Ü','Ö']):
         '''
-        
-        
-        
         :param path_to_text: The default is None.
         :type path_to_text: Type
         :param dictionary: The default is None.
