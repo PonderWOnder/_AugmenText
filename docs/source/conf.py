@@ -12,18 +12,14 @@
 #
 import os
 import sys
-
-sys.path.insert(0, os.path.dirname(os.path.abspath('.')))
-
+sys.path.insert(0, os.path.abspath('../..'))
 
 
 # -- Project information -----------------------------------------------------
 
-
-project = '_Augmentext'
+project = 'Augmentext'
 copyright = '2020, Schmatz, Pasic, Braun, Avramidis'
 author = 'Schmatz, Pasic, Braun, Avramidis'
-
 
 # The full version, including alpha/beta/rc tags
 release = '0.1'
@@ -35,7 +31,12 @@ release = '0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 
+#extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
 extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.coverage',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.viewcode',
 ]
 
 
@@ -53,9 +54,17 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'classic'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+def skip(app, what, name, obj, would_skip, options):
+    if name == "__init__":
+        return False
+    return would_skip
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip)
