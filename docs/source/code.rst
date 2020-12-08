@@ -15,6 +15,6 @@ Documentation of Lexikon and Bibliography Management
 	
 Documentation of Feature extracting Modul
 -----------------------------------------
-.. automodule:: feature_extraction
+.. automodule:: feature_extraction_doku
     :members:
     :undoc-members:
