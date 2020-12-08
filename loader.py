@@ -26,42 +26,27 @@ class aug_loader:
     
     def __init__(self, path_to_text=None,
                  dictionary=None,
-                 syn_loc=os.path.abspath('dictionary\Syn_Ant.txt'),
-                 dict_size=10**6,
-                 signs=[' ','.',',','-',':',')'],
-                 list_of_supported_files=['.doc','.pdf','http:','https:','www.','.htm','.txt'],
-                 supported_chr=[chr(i) for i in range(32,127)]+['ä','ü','ö',
-                                                                'Ä','Ü','Ö']):
+                 syn_loc='dictionary\Syn_Ant.txt',
+                 dict_size=10**6):
         '''
-        
-        
-        
         :param path_to_text: The default is None.
-        :type path_to_text: Type
-        :param dictionary: The default is None.
-        :type dictionary: Type
+        :type path_to_text: Most likely list of URLs
+        :param dictionary: Location of dictionary JSON. The default is None.
+        :type dictionary: None
         :param syn_loc: The default os.path.abspath('dictionary\Syn_Ant.txt').
-        :type syn_loc: Type
-        :param dict_size: The default is 10**6.
-        :type dict_size: Type
-        :param signs: The default is [' ','.',',','-',':',')'].
-        :type sings: Type
-        :param list_of_supported_files: The default is 
-        ['.doc','.pdf','http:','https:','www.','.htm','.txt'].
-        :type list_of_supported_files: Type
-        :param supported_chr: The default is 
-        [chr(i) for i in range(32,127)]+['ä','ü','ö','Ä','Ü','Ö'].
-        :type supported_chr: Type
+        :type syn_loc: String
+        :param dict_size: Size of hashed list. The default is 10**6.
+        :type dict_size: Integer
         :return: None
         '''
         
         self.somepath=path_to_text#should be list of URLs pointing to text of some sort
-        self.syn_ant=syn_loc
+        self.syn_ant=os.path.abspath(syn_loc)
         self.bib={}#will contain bibliography
         self.dict_size=dict_size#predefines size of hashtable dictionary (will be extended automatically if full)
-        self.signs=signs#no idea if we need them but should be used for single words if they are distorted on th end
-        self.list_of_supported_files=list_of_supported_files#nomen est omen
-        self.supported_chr=supported_chr#nomen est omen
+        self.signs=[' ','.',',','-',':',')']#no idea if we need them but should be used for single words if they are distorted on th end
+        self.list_of_supported_files=['.doc','.pdf','http:','https:','www.','.htm','.txt']#nomen est omen
+        self.supported_chr=[chr(i) for i in range(32,127)]+['ä','ü','ö','Ä','Ü','Ö']#nomen est omen
         self.dictionary=dictionary  #list sturcture to be used as hashed list
         self.count=0#just exists for loading bar function no greater us so far
         self.lock=mp.Lock()#function to coordinate dictioary writes in multiprocessing enviorment
