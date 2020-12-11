@@ -22,17 +22,17 @@ class Operation:
         raise RuntimeError('You cannot call base class.')
         
 
-# def nltk_split_text(text, to_words = True):
-#     if to_words == True:
-#         sep = word_tokenize(text)
-#     else:
-#         sep = sent_tokenize(text)
-#     return sep
+def nltk_split_text(text, to_words = True):
+    if to_words == True:
+        sep = word_tokenize(text)
+    else:
+        sep = sent_tokenize(text)
+    return sep
 
 
-# def back_to_text(tokens):
-#     res = "".join([" "+i if not i.startswith("'") and i not in string.punctuation else i for i in tokens]).strip()
-#     return res
+def back_to_text(tokens):
+    res = "".join([" "+i if not i.startswith("'") and i not in string.punctuation else i for i in tokens]).strip()
+    return res
     
 
         
@@ -291,7 +291,7 @@ class KeyDistTypo(Operation):
         final_list = []
         token_list = nltk_split_text(text, to_words = True)
         word_list = []
-        for letter in token: 
+        for letter in token_list: 
             if random.uniform(0,1) < self.p:
                 neighbour_probs = calculating_probs(letter)
                 letter = pick_random_letter(neighbour_probs)

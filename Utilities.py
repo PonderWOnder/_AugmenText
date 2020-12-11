@@ -26,7 +26,7 @@ class load_files():
             
     def import_text(self,rand=True):
         if rand==True:
-            location=self.files_list[random.randint(0, len(self.files_list))]
+            location=self.files_list[random.randint(0, len(self.files_list)-1)]
             txt=open(location,'rb')
             inter=txt.read().decode('utf8','ignore')
             txt.close()
