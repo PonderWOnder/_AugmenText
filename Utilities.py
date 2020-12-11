@@ -4,7 +4,7 @@ Created on Fri Dec 11 14:24:23 2020
 
 @author: GROKA
 """
-
+import multiprocessing as mp
 import random
 import os
 from json import load
@@ -12,17 +12,19 @@ from hashlib import md5
 
 class load_files():
     def __init__(self, files):
-        self.input=os.path.abspath(files)
+        self.input=files
         self.files_list=self.load_text_loc()
         self.iter=0
         
         
     def load_text_loc(self):
         try:
-           return [os.path.join(self.input,i) for i in os.listdir(self.input) if '.txt' in i]
+            self.input=os.path.abspath(self.input)
+            within=os.listdir(self.input)
+            return [os.path.join(self.input,i) for i in within if '.txt' in i]
         except:
-            self.files=input("Please provide Input directory: ")
-            self.load_text_loc()
+            self.input=input("Please provide Input directory: ")
+            return self.load_text_loc()
             
     def import_text(self,rand=True):
         if rand==True:
@@ -43,9 +45,35 @@ class load_files():
             
 
 class lexicon():
+    
     def __init__(self):
-        self.dictionary=self._load_dict()
+        self._load_dict()
+        self.dict_size=len(self.dictionary)
+    
+    def __getitem__(self, value):
+        if type(value)==int:
+            try:
+                return self.dictionary[value]
+            except:
+                print(value,'exceeds lexicon size')
+        elif type(value)==str:
+            try:
+                return self.dictionary[self.find_it(value)]
+            except:
+                print(value,'not yet in lexicon')
+        elif type(value)==slice:
+            try:
+                return self.dictionary[value]
+            except:
+                print(value,'exceeds lexicon size')
+                
+    def add(self,data):        
+        try:
+            self.add_words(data)
+        except:
+            print('something went wrong')
         
+            
         
     def _load_dict(self,location='ouput.new'):
         '''        
@@ -76,10 +104,10 @@ class lexicon():
         :return: Dropped everything on the end of the word that is in 
                  self.sings string.
         '''
-        
+        signs=[' ','.',',','-',':',')']
         if len(word)>1:    
             while True:
-                if word[-1] in self.signs and len(word)>1: #not good for dosages
+                if word[-1] in signs and len(word)>1: #not good for dosages
                     word=word[:-1]
                 else:
                     break
@@ -140,3 +168,106 @@ class lexicon():
         '''
         tf,pos=self.is_it_in_yet(word)
         return pos if tf==True else 'Failure'   
+    
+    def add_words(self,word,occurrence=0,mc=False):
+        '''
+        Adds tokens to the dictionary either counting their appearence or not. 
+        For larger corpus (10**6) it switches in threaded mode
+        
+        :param word: input .
+        :type liste: List
+        :param occurence: The default is 0.
+        :type occurence: Integer
+        :yields: Postition string pairs to be added into self.dictionary at 
+                 position
+        '''
+        
+        if str==type(word):
+            liste=[word]
+        seg_length=100000
+        if len(liste)>seg_length and mc==False:
+            self.num_segs=mp.cpu_count()
+            if type(self.dictionary)!=type(mp.Manager().list()):
+                self.dictionary=mp.Manager().list(self.dictionary)
+            stepsize=int(len(liste)/self.num_segs)
+            stuff_todo=[]
+            for x,i in enumerate(range(0,len(liste),stepsize)):
+                if x==self.num_segs:
+                    stepsize=(len(liste)%i)-1                    
+                
+                stuff_todo.append([self.add_words,(liste[i:i+stepsize],occurrence,True)])
+            self.multi_proc(stuff_todo)
+            self.dictionary=list(self.dictionary)
+        else:
+            for i in liste:
+                try:
+                    i=self.word_it(i)
+                except:
+                    continue
+                if i=='':#this is a hack to avoid empty strings
+                    continue
+                if ord(max(i))>122 or ord(min(i))<97:
+                    self._word_asstimator(i)
+                    if len([let for let in i if let not in self.lower_letters])>1 or len(i)>45:#45 is the longest english word according to wikipedia or more special characters
+                        continue
+                in_yet, target=self.is_it_in_yet(i)
+                if in_yet==True:
+                    to_list=self.dictionary[target]
+                    if int in [type(in_list) for in_list in to_list]:
+                        for pos, val in enumerate(to_list):#predefining structur would be very helpful to keep checking overhead in bay
+                            if type(val)==int:
+                                to_list[pos]+=occurrence
+                                self.vector_size+=occurrence
+                                break
+                    else:
+                        if occurrence>0:
+                            to_list.append(occurrence)
+                            self.vector_size+=1
+                        
+                    self.dictionary[target]=to_list
+                    continue#stdout.write('\r'+i+' is already in dictionary at position '+str(target)+'\n')
+                else:
+                    # if type(self.dictionary)==type(mp.Manager().list()):
+                    #     self.lock.acquire()
+                    try:
+                        if target<self.dict_size/2:
+                            for k in range(target,self.dict_size-1):
+                                if self.dictionary[k]==[]:
+                                    if k!=target:
+                                        to_list=self.dictionary[target]
+                                        to_list.append((i,k))
+                                        self.dictionary[target]=to_list 
+                                    to_list=self.dictionary[k]
+                                    to_list.append(i)
+                                    if occurrence>0:
+                                        to_list.append(occurrence)
+                                        self.vector_size+=occurrence
+                                    self.dictionary[k]=to_list#over complicated by multiprocessing.managers.ListProxy
+                                    #stdout.write('\r'+i+' added at Position '+str(k)+'\n')
+                                    break
+                        else:
+                            for k in range(target,-1,-1):
+                                if self.dictionary[k]==[]:
+                                    if k!=target:
+                                        to_list=self.dictionary[target]
+                                        to_list.append((i,k))
+                                        self.dictionary[target]=to_list 
+                                    to_list=self.dictionary[k]
+                                    to_list.append(i)
+                                    if occurrence>0:
+                                        to_list.append(occurrence)
+                                        self.vector_size+=occurrence
+                                    self.dictionary[k]=to_list#over complicated by multiprocessing.managers.ListProxy
+                                    #stdout.write('\r'+i+' added at Position '+str(k)+'\n')
+                                    break 
+                    except:
+                        self.dictionary.append([i])
+                        if occurrence>0:
+                            self.dictionary[len(self.dictionary)-1].append(occurrence)
+                        pos=len(self.dictionary)-1
+                        to_list=self.dictionary[target]
+                        to_list.append((i,pos))
+                        self.dictionary[target]=to_list
+                        #stdout.write('\r'+i+' added at Position '+str(pos)+'\n')# if there are no open positiones anymore
+                    # if type(self.dictionary)==type(mp.Manager().list()):   
+                    #     self.lock.release()

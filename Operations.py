@@ -10,7 +10,7 @@ import string
 import re
 from nltk.tokenize import word_tokenize, sent_tokenize 
 
-class Operation:
+class Operation(object):
     
     def __init__(self, p):
         self.p = p 
@@ -137,169 +137,174 @@ class DoubleLetter(Operation):
             final_list.append(new_word)
         altered_text = back_to_text(final_list)
         return altered_text
+
+class syn_checker(Operation):
     
-class KeyDistTypo(Operation):
+    def __init__(self,p):
+        Operations.__init__(self,p)
     
-    def __init__(self, p):
-        Operation.__init__(self, p)
-        self.keyboard_positions_lower = {
-            '`' : (-1,0),
-            '1' : (0, 0),
-            '2' : (1, 0),
-            '3' : (2, 0),
-            '4' : (3, 0),
-            '5' : (4, 0),
-            '6' : (5, 0),
-            '7' : (6, 0),
-            '8' : (7, 0),
-            '9' : (8, 0),
-            '0' : (9, 0),
-            '-' : (10,0),
-            '=' : (11,0),
+# class KeyDistTypo(Operation):
+    
+#     def __init__(self, p):
+#         Operation.__init__(self, p)
+#         self.keyboard_positions_lower = {
+#             '`' : (-1,0),
+#             '1' : (0, 0),
+#             '2' : (1, 0),
+#             '3' : (2, 0),
+#             '4' : (3, 0),
+#             '5' : (4, 0),
+#             '6' : (5, 0),
+#             '7' : (6, 0),
+#             '8' : (7, 0),
+#             '9' : (8, 0),
+#             '0' : (9, 0),
+#             '-' : (10,0),
+#             '=' : (11,0),
             
-            'q' : (0, 1),
-            'w' : (1, 1),
-            'e' : (2, 1),
-            'r' : (3, 1),
-            't' : (4, 1),
-            'y' : (5, 1),
-            'u' : (6, 1),
-            'i' : (7, 1),
-            'o' : (8, 1),
-            'p' : (9, 1),
-            '[' : (10,1),
-            ']' : (11,1),
-            '\\': (12,1),
+#             'q' : (0, 1),
+#             'w' : (1, 1),
+#             'e' : (2, 1),
+#             'r' : (3, 1),
+#             't' : (4, 1),
+#             'y' : (5, 1),
+#             'u' : (6, 1),
+#             'i' : (7, 1),
+#             'o' : (8, 1),
+#             'p' : (9, 1),
+#             '[' : (10,1),
+#             ']' : (11,1),
+#             '\\': (12,1),
             
-            'a' : (0, 2),
-            's' : (1, 2),
-            'd' : (2, 2),
-            'f' : (3, 2),
-            'g' : (4, 2),
-            'h' : (5, 2),
-            'j' : (6, 2),
-            'k' : (7, 2),
-            'l' : (8, 2),
-            ';' : (9, 2),
-            "'" : (10,2),
+#             'a' : (0, 2),
+#             's' : (1, 2),
+#             'd' : (2, 2),
+#             'f' : (3, 2),
+#             'g' : (4, 2),
+#             'h' : (5, 2),
+#             'j' : (6, 2),
+#             'k' : (7, 2),
+#             'l' : (8, 2),
+#             ';' : (9, 2),
+#             "'" : (10,2),
             
             
-            'z' : (0, 3),
-            'x' : (1, 3),
-            'c' : (2, 3),
-            'v' : (3, 3),
-            'b' : (4, 3),
-            'n' : (5, 3),
-            'm' : (6, 3),
-            ',' : (7, 3),
-            '.' : (8, 3),
-            '/' : (9, 3),
+#             'z' : (0, 3),
+#             'x' : (1, 3),
+#             'c' : (2, 3),
+#             'v' : (3, 3),
+#             'b' : (4, 3),
+#             'n' : (5, 3),
+#             'm' : (6, 3),
+#             ',' : (7, 3),
+#             '.' : (8, 3),
+#             '/' : (9, 3),
             
-            ' ' : (5, 4)
-            }
+#             ' ' : (5, 4)
+#             }
             
-        self.keyboard_positions_upper = {
-            '~' : (-1,0),
-            '!' : (0, 0),
-            '@' : (1, 0),
-            '#' : (2, 0),
-            '$' : (3, 0),
-            '%' : (4, 0),
-            '^' : (5, 0),
-            '&' : (6, 0),
-            '*' : (7, 0),
-            '(' : (8, 0),
-            ')' : (9, 0),
-            '_' : (10,0),
-            '+' : (11,0),
+#         self.keyboard_positions_upper = {
+#             '~' : (-1,0),
+#             '!' : (0, 0),
+#             '@' : (1, 0),
+#             '#' : (2, 0),
+#             '$' : (3, 0),
+#             '%' : (4, 0),
+#             '^' : (5, 0),
+#             '&' : (6, 0),
+#             '*' : (7, 0),
+#             '(' : (8, 0),
+#             ')' : (9, 0),
+#             '_' : (10,0),
+#             '+' : (11,0),
             
-            'Q' : (0, 1),
-            'W' : (1, 1),
-            'E' : (2, 1),
-            'R' : (3, 1),
-            'T' : (4, 1),
-            'Y' : (5, 1),
-            'U' : (6, 1),
-            'I' : (7, 1),
-            'O' : (8, 1),
-            'P' : (9, 1),
-            '{' : (10,1),
-            '}' : (11,1),
-            '|' : (12,1),
+#             'Q' : (0, 1),
+#             'W' : (1, 1),
+#             'E' : (2, 1),
+#             'R' : (3, 1),
+#             'T' : (4, 1),
+#             'Y' : (5, 1),
+#             'U' : (6, 1),
+#             'I' : (7, 1),
+#             'O' : (8, 1),
+#             'P' : (9, 1),
+#             '{' : (10,1),
+#             '}' : (11,1),
+#             '|' : (12,1),
             
-            'A' : (0, 2),
-            'S' : (1, 2),
-            'D' : (2, 2),
-            'F' : (3, 2),
-            'G' : (4, 2),
-            'H' : (5, 2),
-            'J' : (6, 2),
-            'K' : (7, 2),
-            'L' : (8, 2),
-            ':' : (9, 2),
-            '"' : (10,2),
+#             'A' : (0, 2),
+#             'S' : (1, 2),
+#             'D' : (2, 2),
+#             'F' : (3, 2),
+#             'G' : (4, 2),
+#             'H' : (5, 2),
+#             'J' : (6, 2),
+#             'K' : (7, 2),
+#             'L' : (8, 2),
+#             ':' : (9, 2),
+#             '"' : (10,2),
             
-            'Z' : (0, 3),
-            'X' : (1, 3),
-            'C' : (2, 3),
-            'V' : (3, 3),
-            'B' : (4, 3),
-            'N' : (5, 3),
-            'M' : (6, 3),
-            '<' : (7, 3),
-            '>' : (8, 3),
-            '?' : (9, 3),
+#             'Z' : (0, 3),
+#             'X' : (1, 3),
+#             'C' : (2, 3),
+#             'V' : (3, 3),
+#             'B' : (4, 3),
+#             'N' : (5, 3),
+#             'M' : (6, 3),
+#             '<' : (7, 3),
+#             '>' : (8, 3),
+#             '?' : (9, 3),
             
-            ' ' : (5, 4)
-            }
+#             ' ' : (5, 4)
+#             }
         
-    def calculate_distance(x1, y1, x2, y2):
-        xdist = x2-x1
-        ydist = y2-y1
-        return (xdist**2 + ydist**2)**0.5
+#     def calculate_distance(self,x1, y1, x2, y2):
+#         xdist = x2-x1
+#         ydist = y2-y1
+#         return (xdist**2 + ydist**2)**0.5
     
-    def calculating_probs(key):
-        sum_inverse_dists = 0
-        inverse_dists = {}
-        if key in self.keyboard_positions_lower:
-            keyboard_positions = self.keyboard_positions_lower
-        else:
-            keyboard_positions = self.keyboard_positions_upper
-        posx, posy = keyboard_positions[key]
-        for letter in keyboard_positions: 
-            if letter != key:
-                posx1, posy1 = keyboard_positions[letter]
-                dist = calculate_distance(posx, posy, posx1, posy1)
-                inverse_dist = 1/(dist**6)
-                inverse_dists[letter] = inverse_dist
-                sum_inverse_dists += inverse_dist
-        probs = {}
-        for key, value in inverse_dists.items():
-            probs[key] = value/sum_inverse_dists
-        return probs
+#     def calculating_probs(self,key):
+#         sum_inverse_dists = 0
+#         inverse_dists = {}
+#         if key in self.keyboard_positions_lower:
+#             keyboard_positions = self.keyboard_positions_lower
+#         else:
+#             keyboard_positions = self.keyboard_positions_upper
+#         posx, posy = keyboard_positions[key]
+#         for letter in keyboard_positions: 
+#             if letter != key:
+#                 posx1, posy1 = keyboard_positions[letter]
+#                 dist = self.calculate_distance(posx, posy, posx1, posy1)
+#                 inverse_dist = 1/(dist**6)
+#                 inverse_dists[letter] = inverse_dist
+#                 sum_inverse_dists += inverse_dist
+#         probs = {}
+#         for key, value in inverse_dists.items():
+#             probs[key] = value/sum_inverse_dists
+#         return probs
     
-    def pick_random_letter(prob_dist):
-        letters = []
-        probs = []
-        for key, value in prob_dist.items():
-            letters.append(key)
-            probs.append(value)
-        picked_letter = random.choices(letters, probs)
-        return picked_letter[0]
+#     def pick_random_letter(self,prob_dist):
+#         letters = []
+#         probs = []
+#         for key, value in prob_dist.items():
+#             letters.append(key)
+#             probs.append(value)
+#         picked_letter = random.choices(letters, probs)
+#         return picked_letter[0]
         
-    def perform_operation(self, text):
-        final_list = []
-        token_list = nltk_split_text(text, to_words = True)
-        word_list = []
-        for letter in token_list: 
-            if random.uniform(0,1) < self.p:
-                neighbour_probs = calculating_probs(letter)
-                letter = pick_random_letter(neighbour_probs)
-            word_list.append(letter)
-            new_word = ''.join(word_list)
-        final_list.append(new_word)
-        altered_text = back_to_text(final_list)
-        return altered_text
+#     def perform_operation(self, text):
+#         final_list = []
+#         token_list = nltk_split_text(text, to_words = True)
+#         word_list = []
+#         for letter in token_list: 
+#             if random.uniform(0,1) < self.p:
+#                 neighbour_probs = self.calculating_probs(letter)
+#                 letter = self.pick_random_letter(neighbour_probs)
+#             word_list.append(letter)
+#             new_word = ''.join(word_list)
+#         final_list.append(new_word)
+#         altered_text = back_to_text(final_list)
+#         return altered_text
     
     
 
