@@ -26,4 +26,7 @@ class Pipeline():
         text=self.text
         for func in self.pipeline:
             func
-        
+        return text
+            
+    def random_operations(self):
+        ops=[cls]
