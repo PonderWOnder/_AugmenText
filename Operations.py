@@ -1,6 +1,7 @@
 import random
 import string
 import re
+from nltk.tokenize import word_tokenize, sent_tokenize 
 
 class Operation:
     
@@ -13,14 +14,29 @@ class Operation:
     def perform_operation(self,text):
         raise RuntimeError('You cannot call base class.')
         
+
+def nltk_split_text(text, to_words = True):
+    if to_words == True:
+        sep = word_tokenize(text)
+    else:
+        sep = sent_tokenize(text)
+    return sep
+
+
+def back_to_text(tokens):
+    res = "".join([" "+i if not i.startswith("'") and i not in string.punctuation else i for i in tokens]).strip()
+    return res
+    
+
         
 class RandomTypo(Operation):
     
     def __init__(self, p):
         Operation.__init__(self, p)
         
-    def perform_operation(self, token_list):
+    def perform_operation(self, text):
         letters = string.ascii_lowercase
+        token_list = nltk_split_text(text, to_words = True)
         final_list = []
         for token in token_list:
             word_list = []
@@ -33,8 +49,8 @@ class RandomTypo(Operation):
                 word_list.append(letter)
                 new_word = ''.join(word_list)
             final_list.append(new_word)
-        token_list = final_list
-        return token_list
+        altered_text = back_to_text(final_list)
+        return altered_text
     
 
 class LetterSkip(Operation):
@@ -42,8 +58,9 @@ class LetterSkip(Operation):
     def __init__(self, p):
         Operation.__init__(self, p)
         
-    def perform_operation(self, token_list):
+    def perform_operation(self, text):
         final_list = []
+        token_list = nltk_split_text(text, to_words = True)
         for token in token_list:
             word_list = []
             for letter in token:
@@ -52,8 +69,8 @@ class LetterSkip(Operation):
                 word_list.append(letter)
                 new_word = ''.join(word_list)
             final_list.append(new_word)
-        token_list = final_list
-        return token_list
+        altered_text = back_to_text(final_list)
+        return altered_text
         
     
 class LetterFlip(Operation):
@@ -61,8 +78,9 @@ class LetterFlip(Operation):
     def __init__(self, p):
         Operation.__init__(self, p)
         
-    def perform_operation(self, token_list):
+   def perform_operation(self, text):
         final_list = []
+        token_list = nltk_split_text(text, to_words = True)
         for token in token_list:
             word_list = list(token)
             if len(word_list) > 2:
@@ -71,8 +89,8 @@ class LetterFlip(Operation):
                     word_list[idx], word_list[idx-1] = word_list[idx-1], word_list[idx]
             new_word = ''.join(word_list)
             final_list.append(new_word)
-        token_list=final_list
-        return token_list
+        altered_text = back_to_text(final_list)
+        return altered_text
     
     
 class SpaceInserter(Operation):
@@ -80,8 +98,9 @@ class SpaceInserter(Operation):
     def __init__(self, p):
         Operation.__init__(self, p)
         
-    def perform_operation(self, token_list):
+    def perform_operation(self, text):
         final_list = []
+        token_list = nltk_split_text(text, to_words = True)
         for token in token_list:
             word_list = []
             for letter in token:
@@ -90,16 +109,17 @@ class SpaceInserter(Operation):
                 word_list.append(letter)
                 string_word = ''.join(word_list)
             final_list.append(string_word)
-        token_list = final_list
-        return token_list
+        altered_text = back_to_text(final_list)
+        return altered_text
     
 class DoubleLetter(Operation):
     
     def __init__(self, p):
         Operation.__init__(self, p)
         
-    def perform_operation(self, token_list):
+    def perform_operation(self, text):
         final_list = []
+        token_list = nltk_split_text(text, to_words = True)
         for token in token_list:
             word_list = []
             for letter in token:
@@ -108,8 +128,8 @@ class DoubleLetter(Operation):
                 word_list.append(letter)
             new_word = ''.join(word_list)
             final_list.append(new_word)
-        token_list=final_list
-        return token_list
+        altered_text = back_to_text(final_list)
+        return altered_text
     
 class KeyDistTypo(Operation):
     
@@ -260,9 +280,9 @@ class KeyDistTypo(Operation):
         picked_letter = random.choices(letters, probs)
         return picked_letter[0]
         
-    def perform_operation(self, token_list):
+    def perform_operation(self, text):
         final_list = []
-        for token in token_list:
+        token_list = nltk_split_text(text, to_words = True)
             word_list = []
             for letter in token: 
                 if random.uniform(0,1) < self.p:
@@ -271,4 +291,41 @@ class KeyDistTypo(Operation):
                 word_list.append(letter)
                 new_word = ''.join(word_list)
             final_list.append(new_word)
-        return final_list
+            altered_text = back_to_text(final_list)
+        return altered_text
+    
+    
+class SynonymGenerator(Operation):
+    
+    def __init__(self, p, ant):
+        Operation.__init__(self, p)
+        self.ant = False
+        
+    def perform_operation(self, token_list, ant = False):
+        output=[]
+        what_it_is=('Synonym','Antonym')
+        for word in words: 
+            if type(word)==str:
+                pos=self.find_it(word)
+                info=self.dictionary[pos]
+            elif type(word)==int:
+                info=self.dictionary[word]
+
+            if list in [type(x) for x in info]:
+                for num,i in enumerate(info):
+                    if type(i)==list:
+                        if i[ant]==[]:
+                            stdout.write('No '+what_it_is[ant]+' found for '+word)
+                            output.append(word)
+                            break
+                        per=100
+                        pos_per=randint(1,per)
+                        base=len(i[ant])
+                        which_one=int(round((base(1/per))pos_per,0))-1
+                        output.append(i[ant][which_one])
+                        break
+            else:
+                output.append(word)
+        return output
+
+    
