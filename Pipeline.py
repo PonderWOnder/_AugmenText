@@ -9,7 +9,7 @@ Created on Fri Dec 11 10:13:25 2020
 from Operations import *
 from Utilities import *
 
-class Pipeline(object):
+class Pipeline():
     
     def __init__(self,files=None):
         self.text=self.get_text(files=files)
@@ -38,11 +38,9 @@ class Pipeline(object):
         text=self.text
         
         for x,operation in enumerate(self.pipeline):
-            print(x,operation)
+            #print(x,operation)
             #if callable(operation)==True:
-            print("oi")
             text=operation.perform_operation(text)
-        print(text[:100])
             
     
     def random_operations(self):
@@ -59,14 +57,14 @@ class Pipeline(object):
             self.pipeline.append(self.ops[random.randint(0,len(self.ops)-1)](.1))
     
     
-    def random_typo(self,p = 0.01):
+    def random_typo(self,p):
         if not 0 < p <= 1:
             raise ValueError("Probability must be between 0 and 1.")
         else:
             self.pipeline.append(RandomTypo(p))
             
     def syn_ant(self):
-         self.pipeline.append(syn_checker(1,self.lex))
+         self.pipeline.append(syn_checker(self.lex))
         
 first_try=Pipeline()
 

@@ -60,7 +60,8 @@ class lexicon():
             try:
                 return self.dictionary[self.find_it(value)]
             except:
-                print(value,'not yet in lexicon')
+                pass
+                #print(value,'not yet in lexicon')
         elif type(value)==slice:
             try:
                 return self.dictionary[value]
@@ -204,7 +205,7 @@ class lexicon():
                     i=self.word_it(i)
                 except:
                     continue
-                if i=='':#this is a hack to avoid empty strings
+                if i=='':#this is a hack to avoid empty strings  
                     continue
                 if ord(max(i))>122 or ord(min(i))<97:
                     self._word_asstimator(i)

@@ -12,14 +12,14 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 
 from Utilities import *
 
-class Operation():
+class Operation(object):
     
-    def __init__(self, p,lex=lexicon):
+    def __init__(self, p):
         self.p = p
-        self.lex=lex
+    
         
     def __str__(self):
-        return self.__class__.__name__+str(self.p)
+        return self.__class__.__name__
     
     def perform_operation(self,text):
         raise RuntimeError('You cannot call base class.')
@@ -143,29 +143,29 @@ class DoubleLetter(Operation):
 
 class syn_checker(Operation):
     
-    def __init__(self,p,lex):
-        Operation.__init__(self,p,lex)
+    def __init__(self,lex):
+        self.lex=lex
             
     def perform_operation(self,text,ant=False):
         final_list = []
-        if type(text)==string:
-            token_list = nltk_split_text(text, to_words = True)
-        else:
-            token_list=text
+        token_list = nltk_split_text(text, to_words = True)
         for token in token_list:
-            if list in [type(x) for x in self.lex[token]]:
-                for num,i in enumerate(self.lex[token]):
-                    if type(i)==list:
-                        if i[ant]==[]:
-                            final_list.append(token)
+            try:
+                if list in [type(x) for x in self.lex[token]]:
+                    for num,i in enumerate(self.lex[token]):
+                        if type(i)==list:
+                            if i[ant]==[]:
+                                final_list.append(token)
+                                break
+                            per=100
+                            pos_per=random.randint(1,per)
+                            base=len(i[ant])
+                            which_one=int(round((base**(1/per))**pos_per,0))-1
+                            final_list.append(self.lex[i[ant][which_one]][0])
                             break
-                        per=100
-                        pos_per=random.randint(1,per)
-                        base=len(i[ant])
-                        which_one=int(round((base**(1/per))**pos_per,0))-1
-                        final_list.append(i[ant][which_one])
-                        break
-            else:
+                else:
+                    final_list.append(token)
+            except:
                 final_list.append(token)
         altered_text = back_to_text(final_list)
         return altered_text
