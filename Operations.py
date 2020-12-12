@@ -10,13 +10,16 @@ import string
 import re
 from nltk.tokenize import word_tokenize, sent_tokenize 
 
-class Operation(object):
+from Utilities import *
+
+class Operation():
     
-    def __init__(self, p):
-        self.p = p 
+    def __init__(self, p,lex=lexicon):
+        self.p = p
+        self.lex=lex
         
     def __str__(self):
-        return self.__class__.__name__
+        return self.__class__.__name__+str(self.p)
     
     def perform_operation(self,text):
         raise RuntimeError('You cannot call base class.')
@@ -140,8 +143,32 @@ class DoubleLetter(Operation):
 
 class syn_checker(Operation):
     
-    def __init__(self,p):
-        Operations.__init__(self,p)
+    def __init__(self,p,lex):
+        Operation.__init__(self,p,lex)
+            
+    def perform_operation(self,text,ant=False):
+        final_list = []
+        if type(text)==string:
+            token_list = nltk_split_text(text, to_words = True)
+        else:
+            token_list=text
+        for token in token_list:
+            if list in [type(x) for x in self.lex[token]]:
+                for num,i in enumerate(self.lex[token]):
+                    if type(i)==list:
+                        if i[ant]==[]:
+                            final_list.append(token)
+                            break
+                        per=100
+                        pos_per=random.randint(1,per)
+                        base=len(i[ant])
+                        which_one=int(round((base**(1/per))**pos_per,0))-1
+                        final_list.append(i[ant][which_one])
+                        break
+            else:
+                final_list.append(token)
+        altered_text = back_to_text(final_list)
+        return altered_text
     
 # class KeyDistTypo(Operation):
     
@@ -306,7 +333,7 @@ class syn_checker(Operation):
 #         altered_text = back_to_text(final_list)
 #         return altered_text
     
-    
+
 
 
     
