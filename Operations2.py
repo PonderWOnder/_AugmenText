@@ -12,49 +12,44 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 
 class Operation(object):
     '''
-    The Operations class is an abstract base class (ABC) that
-    all text operations must inherit from in order to be valid
-    for use in an Augmentext pipeline.
-    Any Operation derived class, that implements the following two functions
-    can be added to a pipeline.
-    It consists of the following two functions:
-    The :func:`__init__` function:
-    This function accepts a minimum of at least a :attr:`probability`
-    parameter, which is used to define the chance of the operation being
-    applied as the data is passed through the pipeline.
-    The :func:`perform_operation()` function:
-    The function contains the logic to perform the operations on the
-    data being passed through the pipeline. Text data is passed in list or
-    NumPy array format using the :attr:`text`.
-    Any additional parameters must be passed through the :func:`__init__`
-    initialisation function.
-    
-    The Operations module contains classes for all operations used by 
-    Augmentor.
-    The classes contained in this module are not called or instantiated 
-    directly by the user, instead the user interacts with the
-    :class:`~Augmentor.Pipeline.Pipeline` class and uses the utility functions 
-    contained there.
-    In this module, each operation is a subclass of type :class:`Operation`.
-    The :class:`~Augmentor.Pipeline.Pipeline` objects expect :class:`Operation`
-    types, and therefore all operations are of type :class:`Operation`, and
-    provide their own implementation of the :func:`~Operation.perform_operation`
-    function.
-    Hence, the documentation for this module is intended for developers who
-    wish to extend Augmentor or wish to see how operations function internally.
-    For detailed information on extending Augmentor, see :ref:`extendingaugmentor`
+    The class :class:`Operation` represents the base class for all operations
+    that can be performed. Inherit from :class:`Operation`, overload
+    its methods, and instantiate super to create a new operation. 
     '''
-    #Welches von den 2 trifft am ehesten zu ?
     
     
     def __init__(self, p):
+        '''
+        All operations must at least have a :attr:'probability' which is 
+        initialised when creating the operations's object.
+        :param p: Controls the probability that the opertation is performed 
+        when it is invoked in the pipeline.
         
+        :type p:  Float
+        '''
         self.p = p 
         
     def __str__(self):
+        '''
+        Used to display a string representation of the operation, which is used 
+        by the :func: 'Pipeling.status' to display the currend pipeline's 
+        operations in a human readable way.
+        
+        :return: A string representation of the operation. Can be overridden 
+                 if required.
+        '''
         return self.__class__.__name__
     
     def perform_operation(self,text):
+        '''
+        Perform the operation on the passed text. Each operation must at least
+        have this function, which accepts a list containing objects, perform 
+        its operation, and returns a new list containing objects.
+        
+        :param text: The text(s) to transform.
+        :type text: modified String.
+        :return: The transformed text.
+        '''
         raise RuntimeError('You cannot call base class.')
         
 
@@ -76,11 +71,11 @@ def nltk_split_text(text, to_words = True):
 
 def back_to_text(tokens):
     '''
-    Back to text
+    Untokenizes the modified text
     
-    :param tokens: 
-    :type tokens: 
-    :returns:
+    :param tokens: List of tokens 
+    :type tokens: List
+    :returns: Untokenized modified text as a String
     '''
     
     res = "".join([" "+i if not i.startswith("'") and i not in string.punctuation else i for i in tokens]).strip()
@@ -95,21 +90,24 @@ class RandomTypo(Operation):
     
     
     def __init__(self, p):
+        '''
+        As there are no further user definable paramters, the class is
+        instantiated using only the :attr:'p' argument.
+        
+        :param p: Controls the probability that the operation is performed when
+        it is invoked in the pipeline.
+        :type p: Float
+        '''
         Operation.__init__(self, p)
         
     def perform_operation(self, text):
         '''
+        Inserts random typos with a certain probability.
         
-
-        Parameters
-        ----------
-        text : TYPE
-            DESCRIPTION.
-
-        Returns
-        -------
-        altered_text : TYPE
-            DESCRIPTION.
+        :param p: This represents the probability a letter gets exchanged by 
+        random letter. The default is 0.01.
+        :type p: Float
+        :return: Returns String with the modified tokens in altered_text.
 
         '''
         letters = string.ascii_lowercase
@@ -132,13 +130,30 @@ class RandomTypo(Operation):
 
 class LetterSkip(Operation):
     '''
-    The class :class: 'LetterSlip' skips random characters with a certain probability.
+    The class :class: 'LetterSlip' skips random characters with a certain 
+    probability.
     '''
     
     def __init__(self, p):
+        '''
+        As there are no further user definable paramters, the class is
+        instantiated using only the :attr:'p' argument.
+        
+        :param p: Controls the probability that the operation is performed when
+        it is invoked in the pipeline.
+        :type p: Float
+        '''
         Operation.__init__(self, p)
         
     def perform_operation(self, text):
+        """
+        Skips random characters with a certain probability.
+        
+        :param p: Probabilty of exchanging a letter with an empty string 
+        (i.e to skip it). The default is 0.01.
+        type p: Float
+        :return: Returns String with the modified tokens in altered_text.
+        """
         final_list = []
         token_list = nltk_split_text(text, to_words = True)
         for token in token_list:
@@ -155,13 +170,30 @@ class LetterSkip(Operation):
     
 class LetterFlip(Operation):
     '''
-    The class :class: 'LetterFlip' flips two neighbouring characters with a certain probability.
+    The class :class: 'LetterFlip' flips two neighbouring characters with a 
+    certain probability.
     '''
     
     def __init__(self, p):
+        '''
+        As there are no further user definable paramters, the class is
+        instantiated using only the :attr:'p' argument.
+        
+        :param p: Controls the probability that the operation is performed when
+        it is invoked in the pipeline.
+        :type p: Float
+        '''
         Operation.__init__(self, p)
         
     def perform_operation(self, text):
+        """
+        Flips two neighbouring characters with a certain probability.
+        
+        :param p: Probability that 2 random (neighbour) letters get switched. 
+        The default is 0.01.
+        :type p: Float
+        :return: Returns String with the modified tokens in altered_text
+        """
         final_list = []
         token_list = nltk_split_text(text, to_words = True)
         for token in token_list:
@@ -178,13 +210,30 @@ class LetterFlip(Operation):
     
 class SpaceInserter(Operation):
     '''
-    The class :class: 'SpaceInserter' inserts random spaces in a word with a certain probability.
+    The class :class: 'SpaceInserter' inserts random spaces in a word with a 
+    certain probability.
     '''
     
     def __init__(self, p):
+        '''
+        As there are no further user definable paramters, the class is
+        instantiated using only the :attr:'p' argument.
+        
+        :param p: Controls the probability that the operation is performed when
+        it is invoked in the pipeline.
+        :type p: Float
+        '''
         Operation.__init__(self, p)
         
     def perform_operation(self, text):
+        """
+        Inserts random spaces in a word with a certain probability.  
+        
+        :param p: Probability of inserting a random space between two letters. 
+        The default is 0.01.
+        :type p: Float
+        :return: Returns String with the modified tokens in altered_text
+        """
         final_list = []
         token_list = nltk_split_text(text, to_words = True)
         for token in token_list:
@@ -204,9 +253,25 @@ class DoubleLetter(Operation):
     '''
     
     def __init__(self, p):
+        '''
+        As there are no further user definable paramters, the class is
+        instantiated using only the :attr:'p' argument.
+        
+        :param p: Controls the probability that the operation is performed when
+        it is invoked in the pipeline.
+        :type p: Float
+        '''
         Operation.__init__(self, p)
         
     def perform_operation(self, text):
+        """
+        Doubles characters with a certain probability.
+        
+        :param p: Probabilty that a certain letter occures twice in a row. 
+        The default is 0.01 
+        :type p : Float
+        :return: Returns String with the modified tokens in altered_text.
+        """
         final_list = []
         token_list = nltk_split_text(text, to_words = True)
         for token in token_list:

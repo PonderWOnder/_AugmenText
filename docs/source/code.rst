@@ -1,14 +1,20 @@
 Auto-generated Documentation
 ============================
 
-Documentation of Augmentext_Functions
+Documentation of Operations
 -------------------------------------
-.. automodule:: Augmentext_Functions_doku
+.. automodule:: Operations
     :members:
     :undoc-members:
 
-Documentation of OhOne
+Documentation of Utilities
 -------------------------------------
-.. automodule:: OhOne_doku
+.. automodule:: Utilities
+    :members:
+    :undoc-members:
+
+Documentation of Pipeline
+-------------------------------------
+.. automodule:: Pipeline
     :members:
     :undoc-members:
