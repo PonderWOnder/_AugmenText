@@ -5,7 +5,7 @@ Installation is via ``pip``:
 
 .. code-block:: bash
 
-    pip install Augmentor
+    pip install Augmentext
 
 Required Packages
 -----------------
