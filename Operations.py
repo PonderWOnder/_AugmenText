@@ -2,7 +2,7 @@
 """
 Created on Fri Dec 11 15:42:24 2020
 
-@author: Andreas Braun
+@author: masdasd
 """
 
 import random
@@ -22,6 +22,7 @@ class Operation(object):
         '''
         All operations must at least have a :attr:'probability' which is 
         initialised when creating the operations's object.
+        
         :param p: Controls the probability that the opertation is performed 
         when it is invoked in the pipeline.
         
@@ -85,17 +86,17 @@ def back_to_text(tokens):
         
 class RandomTypo(Operation):
     '''
-    The class :class:'RandomTypo' generates a random typo.
+    The class :class:`RandomTypo` generates a random typo.
     '''
     
     
     def __init__(self, p):
         '''
         As there are no further user definable paramters, the class is
-        instantiated using only the :attr:'p' argument.
+        instantiated using only the :attr:`p` argument.
         
         :param p: Controls the probability that the operation is performed when
-        it is invoked in the pipeline.
+                  it is invoked in the pipeline.
         :type p: Float
         '''
         Operation.__init__(self, p)
@@ -105,7 +106,7 @@ class RandomTypo(Operation):
         Inserts random typos with a certain probability.
         
         :param p: This represents the probability a letter gets exchanged by 
-        random letter. The default is 0.01.
+                  random letter. The default is 0.01.
         :type p: Float
         :return: Returns String with the modified tokens in altered_text.
 
@@ -130,17 +131,17 @@ class RandomTypo(Operation):
 
 class LetterSkip(Operation):
     '''
-    The class :class: 'LetterSlip' skips random characters with a certain 
+    The class :class:`LetterSkip` skips random characters with a certain 
     probability.
     '''
     
     def __init__(self, p):
         '''
         As there are no further user definable paramters, the class is
-        instantiated using only the :attr:'p' argument.
+        instantiated using only the :attr:`p` argument.
         
         :param p: Controls the probability that the operation is performed when
-        it is invoked in the pipeline.
+                  it is invoked in the pipeline.
         :type p: Float
         '''
         Operation.__init__(self, p)
@@ -150,8 +151,8 @@ class LetterSkip(Operation):
         Skips random characters with a certain probability.
         
         :param p: Probabilty of exchanging a letter with an empty string 
-        (i.e to skip it). The default is 0.01.
-        type p: Float
+                 (i.e to skip it). The default is 0.01.
+        :make htmltype p: Float
         :return: Returns String with the modified tokens in altered_text.
         """
         final_list = []
@@ -170,17 +171,17 @@ class LetterSkip(Operation):
     
 class LetterFlip(Operation):
     '''
-    The class :class: 'LetterFlip' flips two neighbouring characters with a 
+    The class :class:`LetterFlip` flips two neighbouring characters with a 
     certain probability.
     '''
     
     def __init__(self, p):
         '''
         As there are no further user definable paramters, the class is
-        instantiated using only the :attr:'p' argument.
+        instantiated using only the :attr:`p` argument.
         
         :param p: Controls the probability that the operation is performed when
-        it is invoked in the pipeline.
+                  it is invoked in the pipeline.
         :type p: Float
         '''
         Operation.__init__(self, p)
@@ -190,7 +191,7 @@ class LetterFlip(Operation):
         Flips two neighbouring characters with a certain probability.
         
         :param p: Probability that 2 random (neighbour) letters get switched. 
-        The default is 0.01.
+                  The default is 0.01.
         :type p: Float
         :return: Returns String with the modified tokens in altered_text
         """
@@ -210,17 +211,17 @@ class LetterFlip(Operation):
     
 class SpaceInserter(Operation):
     '''
-    The class :class: 'SpaceInserter' inserts random spaces in a word with a 
+    The class :class:`SpaceInserter` inserts random spaces in a word with a 
     certain probability.
     '''
     
     def __init__(self, p):
         '''
         As there are no further user definable paramters, the class is
-        instantiated using only the :attr:'p' argument.
+        instantiated using only the :attr:`p` argument.
         
         :param p: Controls the probability that the operation is performed when
-        it is invoked in the pipeline.
+                  it is invoked in the pipeline.
         :type p: Float
         '''
         Operation.__init__(self, p)
@@ -230,7 +231,7 @@ class SpaceInserter(Operation):
         Inserts random spaces in a word with a certain probability.  
         
         :param p: Probability of inserting a random space between two letters. 
-        The default is 0.01.
+                  The default is 0.01.
         :type p: Float
         :return: Returns String with the modified tokens in altered_text
         """
@@ -249,29 +250,29 @@ class SpaceInserter(Operation):
     
 class DoubleLetter(Operation):
     '''
-    The class :class: 'DoubleLetter' doubles characters with a certain probability.
+    The class :class:`DoubleLetter` doubles characters with a certain probability.
     '''
     
     def __init__(self, p):
         '''
         As there are no further user definable paramters, the class is
-        instantiated using only the :attr:'p' argument.
+        instantiated using only the :attr:`p` argument.
         
         :param p: Controls the probability that the operation is performed when
-        it is invoked in the pipeline.
+                  it is invoked in the pipeline.
         :type p: Float
         '''
         Operation.__init__(self, p)
         
     def perform_operation(self, text):
-        """
+        '''
         Doubles characters with a certain probability.
         
         :param p: Probabilty that a certain letter occures twice in a row. 
-        The default is 0.01 
-        :type p : Float
+                  The default is 0.01 
+        :type p: Float
         :return: Returns String with the modified tokens in altered_text.
-        """
+        '''
         final_list = []
         token_list = nltk_split_text(text, to_words = True)
         for token in token_list:

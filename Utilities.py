@@ -12,7 +12,7 @@ from hashlib import md5
 
 class load_files():
     '''
-    The class :class: is meant to load files within the Pipeline module.
+    The class :class:`load_files` is meant to load files within the Pipeline module.
     '''
     def __init__(self, files):
         '''
@@ -43,8 +43,9 @@ class load_files():
     def import_text(self,rand=True):
         '''
         Imports text that file-list points to.
+        
         :param rand: Decides if files are loaded randomly or in order provided
-        in directory.
+                     in directory.
         :type rand: Boolean
         :return: String of text present in file location.
         '''
@@ -67,7 +68,7 @@ class load_files():
 
 class lexicon():
     '''
-    The class :class: Lexicon is a Wrapper for groundthrough dictionary-list
+    The class :class:`lexicon` is a Wrapper for groundthrough dictionary-list
     for accelerate interaction with said list 
     '''
     
@@ -81,7 +82,9 @@ class lexicon():
     def __getitem__(self, value):
         '''
         Python routine to interact.
+        
         :param value: Search request for dictionary-entry.
+        
         :type value: Integer or String
         '''
         if type(value)==int:
@@ -217,7 +220,7 @@ class lexicon():
         :param word: input.
         :type liste: List
         :param occurence: The default is 0. Deprecated will be removed in 
-        later versions.
+                          later versions.
         :type occurence: Integer
         :yields: Postition string pairs to be added into self.dictionary at 
                  position

@@ -26,11 +26,11 @@ class Pipeline():
     def get_text(self,rand=True,files=None):
         '''
         :param rand: If true ,loads a random file from directory. IF false
-        loads first time from directory.
+                     loads first time from directory.
         :type rand: Boolean
         :param files: String pointing to the directory where the files are.
         :type files: If None subroutine is called that ask user to provide 
-        directory. Else String
+                     directory. Else String
         :returns: String from files provided in location files
         '''
         try:
