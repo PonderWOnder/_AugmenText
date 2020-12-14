@@ -10,6 +10,20 @@ from sys import stdout
 from Operations import *
 #from Utilities import *
 
+def output(text,blanks=30):
+    output=''
+    x=0
+    blank=0
+    while True:
+        if text[x]==' ':
+            blank+=1
+        if blank==blanks or len(text)<=x:
+            break
+        else:
+            output+=text[x]
+            x+=1
+    return output
+
 class Pipes():
     
     def __init__(self,files=None):
@@ -50,14 +64,14 @@ class Pipes():
 
         '''
         text=self.text
-        stdout.write(text[:100]+'\n\n')
+        stdout.write(output(text)+'\n\n')
         #self.pipeline=[for op in self.pipeline]
         for x,operation in enumerate(self.pipeline):
             print(str(x)+': '+str(operation)+'\n')
             # if callable(operation)==True:
             #     print('x')
             text=operation.perform_operation(text)
-            stdout.write(text[:100]+'\n')
+            stdout.write(output(text)+'\n')
             text=self.text
             
     
@@ -75,8 +89,11 @@ class Pipes():
             self.pipeline.append(self.ops[random.randint(0,len(self.ops)-1)]())
     
     
-    def random_typo(self,p=None):
-        self.pipeline.append(RandomTypo(p))
+    def random_typo(self,p=0):
+        if not 0 < p <= 1: 
+            raise ValueError("Probability must be between 0 and 1.")
+        else:
+            self.pipeline.append(RandomTypo(p))
             
     def syn_ant(self,ant=False):
         self.pipeline.append(Syn_checker(ant))
@@ -87,34 +104,34 @@ class Pipes():
     def vectorize(self):
         self.pipeline.append(Vector())
         
-    def keydist_typo(self,p):
-        if not 0 < p <= 1:
+    def keydist_typo(self,p=0):
+        if not 0 < p <= 1: 
             raise ValueError("Probability must be between 0 and 1.")
         else:
             self.pipeline.append(KeyDistTypo(p))
 
-    def letter_flip(self,p):
+    def letter_flip(self,p=0):
         if not 0 < p <= 1:
             raise ValueError("Probability must be between 0 and 1.")
         else:
             self.pipeline.append(LetterFlip(p))
 
 
-    def letter_skip(self,p):
+    def letter_skip(self,p=0):
         if not 0 < p <= 1:
             raise ValueError("Probability must be between 0 and 1.")
         else:
             self.pipeline.append(LetterSkip(p))
 
 
-    def double_letter(self,p):
+    def double_letter(self,p=0):
         if not 0 < p <= 1:
             raise ValueError("Probability must be between 0 and 1.")
         else:
             self.pipeline.append(DoubleLetter(p))
 
 
-    def space_inserter(self,p):
+    def space_inserter(self,p=0):
         if not 0 < p <= 1:
             raise ValueError("Probability must be between 0 and 1.")
         else:

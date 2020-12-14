@@ -13,7 +13,7 @@ from Utilities import *
 
 class Operation(object):
     
-    def __init__(self,p,lex):
+    def __init__(self,p=0.01,lex=lexicon()):
         self.p = p
         self.lex=lex
     
@@ -34,7 +34,10 @@ def nltk_split_text(text, to_words = True):
 
 
 def back_to_text(tokens):
-    res = "".join([" "+i if not i.startswith("'") and i not in string.punctuation else i for i in tokens]).strip()
+    befor=['[','{','(']
+    after=['.',',',':',';',')',']','}']
+    neither_nor=['\'','\"',' ']
+    res = "".join(i if tokens[pos+1 if pos<len(tokens)-1 else pos] in after or i in befor else i+' ' for pos,i in enumerate(tokens))
     return res
     
 
@@ -43,7 +46,8 @@ class RandomTypo(Operation):
     
     def __init__(self, p=None):
         if p==None:
-            self.p=0.01
+            Operation.__init__(self,p)
+            if self.p==None: self.p=0.01
         else:
             self.p=p
         
@@ -70,7 +74,8 @@ class LetterSkip(Operation):
     
     def __init__(self, p=None):
         if p==None:
-            self.p=0.01
+            Operation.__init__(self,p)
+            if self.p==None: self.p=0.01
         else:
             self.p=p
         
@@ -93,7 +98,8 @@ class LetterFlip(Operation):
     
     def __init__(self, p=None):
         if p==None:
-            self.p=0.01
+            Operation.__init__(self,p)
+            if self.p==None: self.p=0.01
         else:
             self.p=p
         
@@ -116,7 +122,8 @@ class SpaceInserter(Operation):
     
     def __init__(self, p=None):
         if p==None:
-            self.p=0.01
+            Operation.__init__(self,p)
+            if self.p==None: self.p=0.01
         else:
             self.p=p
         
@@ -139,7 +146,8 @@ class DoubleLetter(Operation):
     
     def __init__(self, p=None):
         if p==None:
-            self.p=0.01
+            Operation.__init__(self,p)
+            if self.p==None: self.p=0.01
         else:
             self.p=p
         
@@ -162,7 +170,8 @@ class Syn_checker(Operation):
     
     def __init__(self,ant=False, lex=None):
         if lex==None:
-            self.lex=lexicon()
+            Operation.__init__(self,lex)
+            if self.lex==None: self.lex=lexicon()
         else:
             self.lex=lex
         self.ant=ant
@@ -196,7 +205,8 @@ class Stemmenizer(Operation):
     
     def __init__(self, lex=None):
         if lex==None:
-            self.lex=lexicon()
+            Operation.__init__(self,lex)
+            if self.lex==None: self.lex=lexicon()
         else:
             self.lex=lex
                 
@@ -225,7 +235,8 @@ class Vector(Operation):
     
     def __init__(self, lex=None):
         if lex==None:
-            self.lex=lexicon()
+            Operation.__init__(self,lex)
+            if self.lex==None: self.lex=lexicon()
         else:
             self.lex=lex
 
@@ -253,7 +264,8 @@ class KeyDistTypo(Operation):
    
     def __init__(self, p=None):
         if p==None:
-            self.p=0.01
+            Operation.__init__(self,p)
+            if self.p==None: self.p=0.01
         else:
             self.p=p
         self.keyboard_positions_lower = {
