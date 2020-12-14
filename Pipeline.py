@@ -87,6 +87,38 @@ class Pipes():
     def vectorize(self):
         self.pipeline.append(Vector())
         
+    def keydist_typo(self,p):
+        if not 0 < p <= 1:
+            raise ValueError("Probability must be between 0 and 1.")
+        else:
+            self.pipeline.append(KeyDistTypo(p))
+
+    def letter_flip(self,p):
+        if not 0 < p <= 1:
+            raise ValueError("Probability must be between 0 and 1.")
+        else:
+            self.pipeline.append(LetterFlip(p))
+
+
+    def letter_skip(self,p):
+        if not 0 < p <= 1:
+            raise ValueError("Probability must be between 0 and 1.")
+        else:
+            self.pipeline.append(LetterSkip(p))
+
+
+    def double_letter(self,p):
+        if not 0 < p <= 1:
+            raise ValueError("Probability must be between 0 and 1.")
+        else:
+            self.pipeline.append(DoubleLetter(p))
+
+
+    def space_inserter(self,p):
+        if not 0 < p <= 1:
+            raise ValueError("Probability must be between 0 and 1.")
+        else:
+            self.pipeline.append(SpaceInserter(p))
     
     def _auto(self):
         while True:
