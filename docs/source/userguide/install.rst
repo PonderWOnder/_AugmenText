@@ -24,7 +24,7 @@ If you prefer to build the package from source, first clone the repository:
 
     git clone https://github.com/mdbloice/Augmentext.git
 
-Then enter the ``Augmentor`` directory and build the package:
+Then enter the ``Augmentext`` directory and build the package:
 
 .. code-block:: bash
 
