@@ -2,7 +2,7 @@
 """
 Created on Fri Dec 11 10:13:25 2020
 
-@author: Konstantin Avramidis
+@author: Avramidis, Braun, Pasic
 """
 
 

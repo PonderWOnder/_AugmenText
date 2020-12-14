@@ -2,7 +2,7 @@
 """
 Created on Fri Dec 11 15:42:24 2020
 
-@author: masdasd
+@author: Avramidis, Braun, Pasic
 """
 
 import random

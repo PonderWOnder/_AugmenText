@@ -2,7 +2,7 @@
 """
 Created on Fri Dec 11 14:24:23 2020
 
-@author: GROKA
+@author: Avramidis, Braun, Pasic
 """
 import multiprocessing as mp
 import random
