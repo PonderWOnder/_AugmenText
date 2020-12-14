@@ -60,7 +60,7 @@ class lexicon():
             try:
                 return self.dictionary[self.find_it(value)]
             except:
-                pass
+                return None
                 #print(value,'not yet in lexicon')
         elif type(value)==slice:
             try:
