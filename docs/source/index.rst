@@ -17,6 +17,7 @@ The documentation is organized as follows:
    
    userguide/features
    userguide/install
+   userguide/usage
 
    code
 
