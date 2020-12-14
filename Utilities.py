@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Dec 11 14:24:23 2020
-
 @author: Avramidis, Braun, Pasic
 """
 import multiprocessing as mp

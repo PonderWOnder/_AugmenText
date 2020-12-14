@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Dec 11 10:13:25 2020
-
 @author: Avramidis, Braun, Pasic
 """
 
