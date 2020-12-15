@@ -14,7 +14,8 @@ class load_files():
     def __init__(self, files):
         self.input=files
         self.files_list=self.load_text_loc()
-        self.iter=0
+        [print(dir_from) for dir_from in self.files_list]
+        self.iter=0#this one should keep track of the vectors
         
         
     def load_text_loc(self):

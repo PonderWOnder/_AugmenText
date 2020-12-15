@@ -243,7 +243,8 @@ class Vector(Operation):
     def perform_operation(self, text):
         final_list=[]
         token_list = nltk_split_text(text, to_words = True)
-        vec_pos=0
+        if not hasattr(self, 'vec_pos'):
+            self.vec_pos=0
         output=[]
         for word in token_list:
             tf,pos=self.lex.is_it_in_yet(word)
@@ -252,9 +253,9 @@ class Vector(Operation):
                    pos_return=[i for i in self.lex[pos] if type(i)==int][0]
                    output.append((pos_return,word))
                else:
-                   self.lex[pos].append(vec_pos)
-                   pos_return=vec_pos
-                   vec_pos+=1
+                   self.lex[pos].append(self.vec_pos)
+                   pos_return=self.vec_pos
+                   self.vec_pos+=1
                    output.append((pos_return,word))
                
         return str(output)

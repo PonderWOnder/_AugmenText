@@ -17,7 +17,7 @@ def output(text,blanks=30):
     while True:
         if text[x]==' ':
             blank+=1
-        if blank==blanks or len(text)<=x:
+        if blank==blanks or len(text)-2<x:
             break
         else:
             output+=text[x]
@@ -67,11 +67,11 @@ class Pipes():
         stdout.write(output(text)+'\n\n')
         #self.pipeline=[for op in self.pipeline]
         for x,operation in enumerate(self.pipeline):
-            print(str(x)+': '+str(operation)+'\n')
+            stdout.write(str(x)+': '+str(operation)+'\n')
             # if callable(operation)==True:
             #     print('x')
             text=operation.perform_operation(text)
-            stdout.write(output(text)+'\n')
+            stdout.write(output(text)+'\n\n')
             text=self.text
             
     
@@ -139,8 +139,11 @@ class Pipes():
     
     def _auto(self):
         while True:
-            self.get_text()
-            for i in range(0,random.randint(1,5)):
-                self.random_operations()
-            self.run()
-            self.clear()
+            try:
+                self.get_text()
+                for i in range(0,random.randint(1,5)):
+                    self.random_operations()
+                self.run()
+                self.clear()
+            except KeyboardInterrupt: 
+                break
