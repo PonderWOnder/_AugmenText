@@ -18,11 +18,11 @@ class augmentor(spell_mistake,aug_loader):
         spell_mistake.__init__(self)
         aug_loader.__init__(self)
         
-        self.somepath=files
-        self.run()
-        if type(tokens)==type(None):
-            self.get_fresh_tokens()
-        self.buffer=[]
+        # self.somepath=files
+        self._run_2()
+        # if type(tokens)==type(None):
+        #     self.get_fresh_tokens()
+        # self.buffer=[]
             
     def get_fresh_tokens(self,pos=0,word=True):
         self.start=[self.bib[key][word] for key in self.bib][pos]

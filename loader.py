@@ -52,7 +52,7 @@ class aug_loader:
         self.lock=mp.Lock()#function to coordinate dictioary writes in multiprocessing enviorment
         self.vector_size=0#depented on the amount of individual words used in text.  Since transformations are applied to text value most likely will be estimated by propabilities of transforamtion
         self.lower_letters=[chr(i) for i in range(97,123)]
-        print('Konsti loaded')
+
         
     def dir_file_or_url(self,location):
         '''
@@ -926,16 +926,15 @@ class aug_loader:
         :return: None
         '''
         
-        self.add_to_bib() 
-        self._load_dict()
+        #self.add_to_bib()
         self.build_dict()
-        self.syno_ant()
-        stuff_todo=self._create_task_list()
-        for things_todo in stuff_todo:
-            self.multi_proc(things_todo)
-        #self._save_dict()
-        input(':')
-        return self
+        # self.syno_ant()
+        # stuff_todo=self._create_task_list()
+        # for things_todo in stuff_todo:
+        #     self.multi_proc(things_todo)
+        # #self._save_dict()
+        # input(':')
+        # return self
 
 
 
