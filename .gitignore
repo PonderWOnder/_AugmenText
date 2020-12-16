@@ -13,6 +13,10 @@ __pycache__/
 .Python
 build/
 docs/
+peida/
+wikipedia/
+peida
+wikipedia
 develop-eggs/
 dist/
 downloads/
